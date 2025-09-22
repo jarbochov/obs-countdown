@@ -509,6 +509,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS');
                 targetDate = null;
             }
+            
+            if (targetDate) {
+                // For date-based timers, calculate the difference to determine which units to show
+                const now = getCurrentDate();
+                const difference = targetDate - now;
+                
+                // Determine highest unit needed based on the time difference
+                if (difference >= 86400000) { // 1 day in milliseconds
+                    highestUnitUsed = 'days';
+                } else if (difference >= 3600000) { // 1 hour in milliseconds
+                    highestUnitUsed = 'hours';
+                } else if (difference >= 60000) { // 1 minute in milliseconds
+                    highestUnitUsed = 'minutes';
+                } else {
+                    highestUnitUsed = 'seconds';
+                }
+                
+                console.log('Date-based timer, highest unit needed:', highestUnitUsed);
+            }
+            
         } 
         // Check for time units
         else {
