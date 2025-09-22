@@ -1,6 +1,8 @@
-# Simple Countdown Timer
+# Parameter Based Countdown Timer
 
 A clean, customizable countdown timer that can be configured entirely through URL parameters. Perfect for presentations, OBS overlays, streams, or any scenario where you need a visual countdown.
+
+Inspired by the [vdo.ninja use of parameters](https://docs.vdo.ninja/advanced-settings) to configure browser overlays in OBS as opposed to plugins. 
 
 ## Demo
 
