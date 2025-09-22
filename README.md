@@ -42,12 +42,14 @@ Multiple time units can be combined: `?days=1&hours=12`
 | `redirecturl` | URL to redirect to when timer completes | `?redirecturl=https://example.com` |
 | `redirectdelay` | Seconds to wait before redirecting (default: 1) | `?redirectdelay=5` |
 
+#### Units
+
 When using `units=full`, the timer will show all time units from the highest configured unit down to seconds, regardless of whether some values are zero. For example:
 - If you set `minutes=5`, it will show minutes and seconds (05:00)
 - If you set `hours=1`, it will show hours, minutes, and seconds (01:00:00)
 - If you set `days=1`, it will show days, hours, minutes, and seconds (01:00:00:00)
 
-The `auto` setting (default) intelligently hides units that are zero to keep the display clean.
+The `auto` setting (default) intelligently hides units that are zero to keep the display clean. For times larger than 1.5 days (36 hours) it will only show the days unit. 
 
 ### Color Customization
 
