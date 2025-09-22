@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalDuration = 0;
     let originalDuration = 0; // Store the original duration for progress bar calculations
     let isDateBasedTimer = false; // Flag to identify date-based timers
+    let highestUnitUsed = 'seconds'; // Track highest unit used for units=full mode
     
     // Get timezone parameter (e.g., 'America/New_York', 'Europe/London')
     const timezone = urlParams.get('timezone');
@@ -255,7 +256,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Save redirect parameters
                     redirecturl: redirectUrl || '',
-                    redirectdelay: urlParams.get('redirectdelay') || ''
+                    redirectdelay: urlParams.get('redirectdelay') || '',
+
+                    // Save highest unit used for proper display restoration
+                    highestUnitUsed: highestUnitUsed
                 };
                 
                 localStorage.setItem('current_timer', JSON.stringify(timerState));
@@ -313,6 +317,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Restore original duration for progress calculation
             originalDuration = savedState.originalDuration || savedState.totalDuration;
+            
+            // Restore highest unit used for units=full display
+            highestUnitUsed = savedState.highestUnitUsed || 'seconds';
             
             // Calculate new progress percentage
             if (originalDuration > 0 && showProgress) {
@@ -505,6 +512,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let addedTime = false;
             
+            // Determine highest unit used for units=full mode
+            if (urlParams.has('days') && parseInt(urlParams.get('days')) > 0) {
+                highestUnitUsed = 'days';
+            } else if (urlParams.has('hours') && parseInt(urlParams.get('hours')) > 0) {
+                highestUnitUsed = 'hours';
+            } else if (urlParams.has('minutes') && parseInt(urlParams.get('minutes')) > 0) {
+                highestUnitUsed = 'minutes';
+            }
+            
+            console.log('Highest unit used:', highestUnitUsed); // Debugging log
+            
             if (urlParams.has('days')) {
                 const days = parseInt(urlParams.get('days'));
                 targetDate.setDate(targetDate.getDate() + days);
@@ -538,6 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Default to 5 minutes if no parameters provided
                 targetDate.setMinutes(targetDate.getMinutes() + 5);
                 totalDuration = 5 * 60 * 1000;
+                highestUnitUsed = 'minutes'; // Set default highest unit
             }
         }
         
@@ -597,6 +616,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressContainer.style.display = 'none';
                 timerTitleElement.style.display = 'none';
                 completeMessage.style.display = 'none';
+                
+                // Add logging to help debug the redirect
+                console.log("Timer complete with showonend=none. Redirect URL:", redirectUrl);
             }
             else {
                 // Default: Show endmessage
@@ -620,12 +642,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Redirect if a URL is specified
             if (redirectUrl) {
+                console.log(`Timer complete. Redirecting to ${redirectUrl} in ${redirectDelay/1000} seconds...`);
                 setTimeout(() => {
                     window.location.href = redirectUrl;
                 }, redirectDelay);
             }
-            //  Redirect if Webhook URL is specified
+            
+            // Call webhook if URL is specified
             if (webhookUrl) {
+                console.log(`Timer complete. Calling webhook ${webhookUrl} in ${webhookDelay/1000} seconds...`);
                 setTimeout(() => {
                     callWebhook(webhookUrl, webhookMethod);
                 }, webhookDelay);
@@ -686,19 +711,28 @@ document.addEventListener('DOMContentLoaded', function() {
             compactTimer.classList.remove('short-timer');
         }
         
-        // Show/hide relevant segments in standard display
-        daysContainer.style.display = days > 0 ? 'flex' : 'none';
-        
-        if (showOnlyDays) {
-            // If more than 1.5 days, only show days unless units=full
-            hoursContainer.style.display = 'none';
-            minutesContainer.style.display = 'none';
-            secondsContainer.style.display = 'none';
+        // For standard display: show/hide units based on the display mode
+        if (unitsDisplay === 'full') {
+            // When units=full, show all units from the highest used down to seconds
+            daysContainer.style.display = (highestUnitUsed === 'days') ? 'flex' : 'none';
+            hoursContainer.style.display = (highestUnitUsed === 'days' || highestUnitUsed === 'hours') ? 'flex' : 'none';
+            minutesContainer.style.display = (highestUnitUsed !== 'seconds') ? 'flex' : 'none';
+            secondsContainer.style.display = 'flex'; // Always show seconds
         } else {
-            // Use the original logic for showing/hiding units
-            hoursContainer.style.display = (days > 0 || hours > 0) ? 'flex' : 'none';
-            minutesContainer.style.display = (days > 0 || hours > 0 || minutes > 0) ? 'flex' : 'none';
-            secondsContainer.style.display = 'flex'; // Always show seconds in standard mode
+            // Original adaptive display logic for 'auto' mode
+            daysContainer.style.display = days > 0 ? 'flex' : 'none';
+            
+            if (showOnlyDays) {
+                // If more than 1.5 days, only show days
+                hoursContainer.style.display = 'none';
+                minutesContainer.style.display = 'none';
+                secondsContainer.style.display = 'none';
+            } else {
+                // Use the original logic for showing/hiding units
+                hoursContainer.style.display = (days > 0 || hours > 0) ? 'flex' : 'none';
+                minutesContainer.style.display = (days > 0 || hours > 0 || minutes > 0) ? 'flex' : 'none';
+                secondsContainer.style.display = 'flex'; // Always show seconds in standard mode
+            }
         }
         
         // Update compact display
@@ -707,32 +741,47 @@ document.addEventListener('DOMContentLoaded', function() {
         compactMinutesElement.textContent = formatNumber(minutes);
         compactSecondsElement.textContent = formatNumber(seconds);
         
-        // Apply the same logic to compact display
-        if (showOnlyDays) {
-            // If more than 1.5 days, only show days unless units=full
-            compactDaysElement.style.display = 'inline';
-            daysDelimiter.style.display = 'none'; // Hide delimiter after days
-            compactHoursElement.style.display = 'none';
-            hoursDelimiter.style.display = 'none';
-            compactMinutesElement.style.display = 'none';
-            minutesDelimiter.style.display = 'none';
-            compactSecondsElement.style.display = 'none';
-        } else {
-            // Use the original logic for showing/hiding units
-            const showDays = days > 0;
-            const showHours = days > 0 || hours > 0;
-            const showMinutes = days > 0 || hours > 0 || minutes > 0;
+        // For compact display: show/hide units based on the display mode
+        if (unitsDisplay === 'full') {
+            // When units=full, show all units from the highest used down to seconds
+            compactDaysElement.style.display = (highestUnitUsed === 'days') ? 'inline' : 'none';
+            daysDelimiter.style.display = (highestUnitUsed === 'days') ? 'inline' : 'none';
             
-            compactDaysElement.style.display = showDays ? 'inline' : 'none';
-            daysDelimiter.style.display = showDays ? 'inline' : 'none';
+            compactHoursElement.style.display = (highestUnitUsed === 'days' || highestUnitUsed === 'hours') ? 'inline' : 'none';
+            hoursDelimiter.style.display = (highestUnitUsed === 'days' || highestUnitUsed === 'hours') ? 'inline' : 'none';
             
-            compactHoursElement.style.display = showHours ? 'inline' : 'none';
-            hoursDelimiter.style.display = showHours ? 'inline' : 'none';
-            
-            compactMinutesElement.style.display = showMinutes ? 'inline' : 'none';
-            minutesDelimiter.style.display = showMinutes ? 'inline' : 'none';
+            compactMinutesElement.style.display = (highestUnitUsed !== 'seconds') ? 'inline' : 'none';
+            minutesDelimiter.style.display = (highestUnitUsed !== 'seconds') ? 'inline' : 'none';
             
             compactSecondsElement.style.display = 'inline'; // Always show seconds
+        } else {
+            // Original adaptive display logic for 'auto' mode
+            if (showOnlyDays) {
+                // If more than 1.5 days, only show days
+                compactDaysElement.style.display = 'inline';
+                daysDelimiter.style.display = 'none'; // Hide delimiter after days
+                compactHoursElement.style.display = 'none';
+                hoursDelimiter.style.display = 'none';
+                compactMinutesElement.style.display = 'none';
+                minutesDelimiter.style.display = 'none';
+                compactSecondsElement.style.display = 'none';
+            } else {
+                // Use the original logic for showing/hiding units
+                const showDays = days > 0;
+                const showHours = days > 0 || hours > 0;
+                const showMinutes = days > 0 || hours > 0 || minutes > 0;
+                
+                compactDaysElement.style.display = showDays ? 'inline' : 'none';
+                daysDelimiter.style.display = showDays ? 'inline' : 'none';
+                
+                compactHoursElement.style.display = showHours ? 'inline' : 'none';
+                hoursDelimiter.style.display = showHours ? 'inline' : 'none';
+                
+                compactMinutesElement.style.display = showMinutes ? 'inline' : 'none';
+                minutesDelimiter.style.display = showMinutes ? 'inline' : 'none';
+                
+                compactSecondsElement.style.display = 'inline'; // Always show seconds
+            }
         }
         
         // Save the timer state every 10 seconds for potential resumption

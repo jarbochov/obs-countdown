@@ -32,7 +32,7 @@ Multiple time units can be combined: `?days=1&hours=12`
 |-----------|-------------|--------|
 | `theme` | Set the color theme | `light` (default), `dark` |
 | `display` | Set the display format | `standard` (default), `compact` |
-| `units` | Control time unit display | `auto` (default), `full` |
+| `units` | Control time unit display | `auto` (default, hide zero units), `full` (show all units from highest configured unit down to seconds) |
 | `progress` | Show progress bar | `true`, `false` (default) |
 | `title` | Add a title above the timer | `?title=Meeting%20Timer` |
 | `endmessage` | Custom text or emoji shown when timer completes | `?endmessage=🎉` (default: ⌛️) |
@@ -41,6 +41,13 @@ Multiple time units can be combined: `?days=1&hours=12`
 | `mobile` | Control mobile optimization | `true` (default), `false` |
 | `redirecturl` | URL to redirect to when timer completes | `?redirecturl=https://example.com` |
 | `redirectdelay` | Seconds to wait before redirecting (default: 1) | `?redirectdelay=5` |
+
+When using `units=full`, the timer will show all time units from the highest configured unit down to seconds, regardless of whether some values are zero. For example:
+- If you set `minutes=5`, it will show minutes and seconds (05:00)
+- If you set `hours=1`, it will show hours, minutes, and seconds (01:00:00)
+- If you set `days=1`, it will show days, hours, minutes, and seconds (01:00:00:00)
+
+The `auto` setting (default) intelligently hides units that are zero to keep the display clean.
 
 ### Color Customization
 
