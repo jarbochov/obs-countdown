@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
+        // Add showonend parameter: 'zero' or 'none'
+        const showOnEnd = urlParams.get('showonend') || 'none';
     let targetDate;
     let startDate;
     let countdownInterval;
@@ -513,20 +515,37 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if countdown is complete
         if (difference <= 0) {
             clearInterval(countdownInterval);
-            standardTimer.style.display = 'none';
-            compactTimer.style.display = 'none';
-            progressContainer.style.display = 'none';
-            timerTitleElement.style.display = 'none';
-            completeMessage.style.display = 'block';
-            
-            // Custom emoji for completion if provided
-            if (urlParams.has('completeemoji')) {
-                completeMessage.textContent = decodeURIComponent(urlParams.get('completeemoji'));
-            }
-            
-            // Clear the saved timer state
-            localStorage.removeItem('current_timer');
-            return;
+                if (showOnEnd === 'zero') {
+                    // Show zeroes in both displays
+                    daysElement.textContent = '00';
+                    hoursElement.textContent = '00';
+                    minutesElement.textContent = '00';
+                    secondsElement.textContent = '00';
+                    compactDaysElement.textContent = '00';
+                    compactHoursElement.textContent = '00';
+                    compactMinutesElement.textContent = '00';
+                    compactSecondsElement.textContent = '00';
+                    // Show timer, hide complete message
+                    standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
+                    compactTimer.style.display = displayMode === 'compact' ? 'flex' : 'none';
+                    progressContainer.style.display = 'none';
+                    timerTitleElement.style.display = 'none';
+                    completeMessage.style.display = 'none';
+                } else {
+                    // Hide timer, show complete message
+                    standardTimer.style.display = 'none';
+                    compactTimer.style.display = 'none';
+                    progressContainer.style.display = 'none';
+                    timerTitleElement.style.display = 'none';
+                    completeMessage.style.display = 'block';
+                    // Custom emoji for completion if provided
+                    if (urlParams.has('completeemoji')) {
+                        completeMessage.textContent = decodeURIComponent(urlParams.get('completeemoji'));
+                    }
+                }
+                // Clear the saved timer state
+                localStorage.removeItem('current_timer');
+                return;
         }
         
         // Calculate time units
