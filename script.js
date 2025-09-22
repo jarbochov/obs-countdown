@@ -16,6 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     // Add showonend parameter: 'zero' or 'none' or 'message' (default)
     const showOnEnd = urlParams.get('showonend') || 'message';
+    // Add redirect parameters
+    const redirectUrl = urlParams.get('redirecturl');
+    const redirectDelay = urlParams.has('redirectdelay') ? parseInt(urlParams.get('redirectdelay')) * 1000 : 1000; // Default 1 second delay
+    
     let targetDate;
     let startDate;
     let countdownInterval;
@@ -241,7 +245,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     endmessage: urlParams.get('endmessage') || urlParams.get('completeemoji') || '',
                     
                     // Save showonend parameter
-                    showonend: showOnEnd
+                    showonend: showOnEnd,
+                    
+                    // Save redirect parameters
+                    redirecturl: redirectUrl || '',
+                    redirectdelay: urlParams.get('redirectdelay') || ''
                 };
                 
                 localStorage.setItem('current_timer', JSON.stringify(timerState));
@@ -512,6 +520,8 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Is date-based timer:', isDateBasedTimer);
     console.log('Mobile optimized:', mobileOptimized && isMobileDevice());
     console.log('Show on end mode:', showOnEnd);
+    console.log('Redirect URL:', redirectUrl || 'None');
+    console.log('Redirect delay (ms):', redirectUrl ? redirectDelay : 'N/A');
     
     // Update timer function
     function updateTimer() {
@@ -567,6 +577,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.log('Note: "completeemoji" parameter is deprecated. Please use "endmessage" instead.');
                     }
                 }
+            }
+            
+            // Redirect if a URL is specified
+            if (redirectUrl) {
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, redirectDelay);
             }
             
             // Clear the saved timer state

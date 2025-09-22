@@ -8,11 +8,8 @@ Try it live at: [countdown.example.com](https://countdown.example.com)
 
 ## Usage
 
-Simply open `index.html` in a browser, or use URL parameters to customize the timer:
+Simply open `index.html` in a browser, or use URL parameters to customize the timer: https://path-to-timer/index.html?minutes=10&theme=dark
 
-```
-https://path-to-timer/index.html?minutes=10&theme=dark
-```
 
 ## URL Parameters
 
@@ -42,6 +39,8 @@ Multiple time units can be combined: `?days=1&hours=12`
 | `showonend` | Control what to display when timer ends | `message` (default, shows endmessage), `zero` (shows 00:00), `none` (shows nothing) |
 | `resume` | Resume interrupted timer | `true`, `false` (default) |
 | `mobile` | Control mobile optimization | `true` (default), `false` |
+| `redirecturl` | URL to redirect to when timer completes | `?redirecturl=https://example.com` |
+| `redirectdelay` | Seconds to wait before redirecting (default: 1) | `?redirectdelay=5` |
 
 ### Color Customization
 
@@ -89,49 +88,17 @@ The timer uses localStorage to allow resuming interrupted timers that are create
 ## Examples
 
 1. **10-minute timer with dark theme and title**:
-   ```
-   index.html?minutes=10&theme=dark&title=Team%20Meeting
-   ```
-
 2. **Countdown to a specific date with timezone**:
-   ```
-   index.html?date=2023-12-31&display=compact&title=New%20Year&timezone=America/New_York
-   ```
-
 3. **3-day countdown showing all units with progress bar**:
-   ```
-   index.html?days=3&units=full&progress=true
-   ```
-
 4. **Presentation timer with custom colors**:
-   ```
-   index.html?minutes=45&theme=dark&display=compact&progress=true&title=My%20Talk&bgcolor=2c3e50&progresscolor=e74c3c
-   ```
-
 5. **Custom end message when timer completes**:
-   ```
-   index.html?minutes=5&endmessage=DONE!
-   ```
-
 6. **Show zeros when timer ends**:
-   ```
-   index.html?minutes=2&showonend=zero
-   ```
-
 7. **Show nothing when timer ends**:
-   ```
-   index.html?minutes=2&showonend=none
-   ```
-
 8. **Resume an interrupted timer**:
-   ```
-   index.html?resume=true
-   ```
-
 9. **Event timer with mobile optimization disabled**:
-   ```
-   index.html?date=2023-10-15T09:00:00&title=Event%20Start&mobile=false
-   ```
+10. **Redirect to a URL when timer completes**:
+11. **Redirect with a 3-second delay**:
+
 
 ## OBS Integration Tips
 
@@ -141,9 +108,9 @@ For best results when using as an OBS Browser Source:
 2. Enable "Shutdown source when not visible" to conserve resources
 3. Disable "Refresh browser when scene becomes active" to prevent timer resets
 4. Use custom CSS in OBS to make the background transparent if needed:
-   ```css
-   body { background-color: rgba(0, 0, 0, 0) !important; }
-   ```
+```css
+body { background-color: rgba(0, 0, 0, 0) !important; }
+```
 
 ## Technical Details
 
@@ -153,12 +120,5 @@ For best results when using as an OBS Browser Source:
 - Uses the Intl.DateTimeFormat API for timezone support
 - Uses localStorage for timer state persistence (resume feature for duration-based timers)
 - Font scaling that works well across all device sizes
-
-## Notes
-
-- The `completeemoji` parameter has been renamed to `endmessage` to better reflect its purpose, as it now supports both text and emoji characters.
-- The old parameter name is still supported for backward compatibility.
-
-## License
 
 MIT License
