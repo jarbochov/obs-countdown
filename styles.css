@@ -68,7 +68,7 @@ body, html {
 
 /* Progress bar styles */
 #progress-container {
-    width: 80%;
+    width: 50%;
     max-width: 80vw;
     height: clamp(6px, 1.5vh, 12px);
     background-color: var(--progress-background);
