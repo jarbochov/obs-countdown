@@ -169,16 +169,255 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--title-color', '#' + urlParams.get('titlecolor'));
     }
     
-    // Check for resume parameter - only for non-date-based timers
-    if (urlParams.has('resume') && urlParams.get('resume') === 'true' && 
-        !urlParams.has('date')) {
-        // Only try to resume if we're not setting up a new timer
-        if (!urlParams.has('days') && !urlParams.has('hours') && 
-            !urlParams.has('minutes') && !urlParams.has('seconds')) {
-            resumeCountdown();
+    // Standard display elements
+    const daysElement = document.getElementById('days');
+    const hoursElement = document.getElementById('hours');
+    const minutesElement = document.getElementById('minutes');
+    const secondsElement = document.getElementById('seconds');
+    
+    const daysContainer = document.getElementById('days-container');
+    const hoursContainer = document.getElementById('hours-container');
+    const minutesContainer = document.getElementById('minutes-container');
+    const secondsContainer = document.getElementById('seconds-container');
+    
+    // Compact display elements
+    const compactDaysElement = document.getElementById('compact-days');
+    const compactHoursElement = document.getElementById('compact-hours');
+    const compactMinutesElement = document.getElementById('compact-minutes');
+    const compactSecondsElement = document.getElementById('compact-seconds');
+    
+    const daysDelimiter = document.querySelector('.days-delimiter');
+    const hoursDelimiter = document.querySelector('.hours-delimiter');
+    const minutesDelimiter = document.querySelector('.minutes-delimiter');
+    
+    const completeMessage = document.getElementById('complete-message');
+    const resumeBanner = document.getElementById('resume-banner');
+    
+    // Save current timer state for potential resumption
+    function saveTimerState() {
+        try {
+            // Only save if timer is active and NOT a date-based timer
+            if (!isDateBasedTimer && targetDate > getCurrentDate()) {
+                // Calculate current progress percentage
+                let currentProgress = 0;
+                if (originalDuration > 0) {
+                    const now = getCurrentDate();
+                    const remaining = targetDate - now;
+                    const elapsed = originalDuration - remaining;
+                    currentProgress = Math.min(100, (elapsed / originalDuration) * 100);
+                }
+                
+                const timerState = {
+                    // Only for relative timers, store the calculated target date
+                    targetDate: targetDate.toISOString(),
+                    startDate: startDate.toISOString(),
+                    totalDuration: totalDuration,
+                    originalDuration: originalDuration,
+                    
+                    // Store progress percentage
+                    progressPercentage: currentProgress,
+                    
+                    // Store display settings
+                    display: displayMode,
+                    theme: theme,
+                    units: unitsDisplay,
+                    progress: showProgress ? 'true' : 'false',
+                    title: timerTitle || '',
+                    timezone: timezone || '',
+                    mobile: mobileParam || 'true',
+                    savedAt: new Date().toISOString(),
+                    
+                    // Include all color settings
+                    bgcolor: urlParams.get('bgcolor') || '',
+                    textcolor: urlParams.get('textcolor') || '',
+                    timercolor: urlParams.get('timercolor') || '',
+                    labelcolor: urlParams.get('labelcolor') || '',
+                    progresscolor: urlParams.get('progresscolor') || '',
+                    titlecolor: urlParams.get('titlecolor') || '',
+                    completeemoji: urlParams.get('completeemoji') || ''
+                };
+                
+                localStorage.setItem('current_timer', JSON.stringify(timerState));
+            } else if (!isDateBasedTimer) {
+                // Clear saved state if timer is complete
+                localStorage.removeItem('current_timer');
+            }
+        } catch (e) {
+            console.error("Error saving timer state:", e);
         }
-    } else {
-        // Check if there's a saved timer and show resume banner if needed
+    }
+    
+    // Resume a previously interrupted countdown (only for non-date-based timers)
+    function resumeCountdown() {
+        try {
+            const savedState = JSON.parse(localStorage.getItem('current_timer'));
+            if (!savedState) return false;
+            
+            const now = getCurrentDate();
+            console.log('Attempting to resume timer:', savedState);
+            
+            // Make sure the saved state isn't too old (e.g., more than a day)
+            const savedAt = new Date(savedState.savedAt);
+            if (now - savedAt > 24 * 60 * 60 * 1000) {
+                console.log('Saved timer is too old, not resuming');
+                localStorage.removeItem('current_timer');
+                return false;
+            }
+            
+            // For time-based timers, recalculate the target date based on remaining time
+            const savedTargetDate = createDate(savedState.targetDate);
+            const elapsedSinceSave = now - savedAt;
+            
+            // Calculate how much time was remaining when the timer was saved
+            const remainingAtSave = savedTargetDate - savedAt;
+            
+            // Calculate new remaining time by subtracting elapsed time since save
+            const newRemainingTime = Math.max(0, remainingAtSave - elapsedSinceSave);
+            
+            console.log('Time remaining when saved (ms):', remainingAtSave);
+            console.log('Time elapsed since save (ms):', elapsedSinceSave);
+            console.log('New remaining time (ms):', newRemainingTime);
+            
+            // If no time remains, don't resume
+            if (newRemainingTime <= 0) {
+                console.log('No time remaining, not resuming timer');
+                localStorage.removeItem('current_timer');
+                return false;
+            }
+            
+            // Set new target date based on current time + remaining time
+            targetDate = new Date(now.getTime() + newRemainingTime);
+            startDate = createDate(savedState.startDate);
+            totalDuration = savedState.totalDuration;
+            
+            // Restore original duration for progress calculation
+            originalDuration = savedState.originalDuration || savedState.totalDuration;
+            
+            // Calculate new progress percentage
+            if (originalDuration > 0 && showProgress) {
+                const elapsed = originalDuration - newRemainingTime;
+                const percentComplete = Math.min(100, (elapsed / originalDuration) * 100);
+                progressBar.style.width = percentComplete + '%';
+                console.log('Updated progress bar to:', percentComplete + '%');
+            }
+            
+            // Apply mobile optimization if needed
+            const savedMobile = savedState.mobile !== 'false';
+            if (savedMobile && isMobileDevice()) {
+                document.body.classList.add('mobile-optimized');
+            } else {
+                document.body.classList.remove('mobile-optimized');
+            }
+            
+            // Apply the saved title if present
+            if (savedState.title) {
+                timerTitleElement.textContent = savedState.title;
+                timerTitleElement.style.display = 'block';
+                document.title = savedState.title + ' - Countdown Timer';
+            }
+            
+            // Apply saved display mode
+            if (savedState.display === 'compact') {
+                standardTimer.style.display = 'none';
+                compactTimer.style.display = 'flex';
+            } else {
+                standardTimer.style.display = 'flex';
+                compactTimer.style.display = 'none';
+            }
+            
+            // Apply saved theme
+            if (savedState.theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            
+            // Apply saved progress bar
+            if (savedState.progress === 'true') {
+                progressContainer.style.display = 'block';
+            }
+            
+            // Apply saved colors
+            const colorMappings = [
+                { saved: 'bgcolor', css: '--background-color' },
+                { saved: 'timercolor', css: '--timer-background' },
+                { saved: 'textcolor', css: '--text-color' },
+                { saved: 'labelcolor', css: '--label-color' },
+                { saved: 'progresscolor', css: '--progress-color' },
+                { saved: 'titlecolor', css: '--title-color' }
+            ];
+            
+            colorMappings.forEach(mapping => {
+                if (savedState[mapping.saved]) {
+                    document.documentElement.style.setProperty(mapping.css, '#' + savedState[mapping.saved]);
+                }
+            });
+            
+            // Hide the resume banner
+            resumeBanner.style.display = 'none';
+            console.log('Timer successfully resumed with new target:', targetDate);
+            
+            return true;
+        } catch (e) {
+            console.error("Error resuming countdown:", e);
+            return false;
+        }
+    }
+    
+    // Check if there's a saved timer that can be resumed
+    function checkForResumableSessions() {
+        try {
+            const savedState = JSON.parse(localStorage.getItem('current_timer'));
+            if (!savedState || !savedState.targetDate || !savedState.savedAt) return;
+            
+            const now = getCurrentDate();
+            const savedAt = new Date(savedState.savedAt);
+            const savedTargetDate = createDate(savedState.targetDate);
+            
+            // Calculate the remaining time with the correct approach
+            const remainingAtSave = savedTargetDate - savedAt;
+            const elapsedSinceSave = now - savedAt;
+            const newRemainingTime = Math.max(0, remainingAtSave - elapsedSinceSave);
+            
+            // If timer is still valid (has remaining time, not too old)
+            if (newRemainingTime > 0 && (now - savedAt < 24 * 60 * 60 * 1000)) {
+                showResumeBanner(savedState);
+            } else {
+                // Clean up expired timer data
+                localStorage.removeItem('current_timer');
+            }
+        } catch (e) {
+            console.error("Error checking for resumable sessions:", e);
+        }
+    }
+    
+    // Helper function to show the resume banner
+    function showResumeBanner(savedState) {
+        resumeBanner.style.display = 'block';
+        
+        // Add the timer title to the resume banner if it exists
+        if (savedState.title) {
+            const resumeText = resumeBanner.querySelector('p');
+            resumeText.innerHTML = `"${savedState.title}" timer was interrupted. <a href="?resume=true">Resume?</a>`;
+        }
+    }
+    
+    // IMPORTANT: Check for resume conditions BEFORE creating a new timer
+    // This is critical to fix the resume functionality when refreshing the page
+    if (urlParams.has('resume') && urlParams.get('resume') === 'true' && !urlParams.has('date')) {
+        const resumed = resumeCountdown();
+        
+        // If successfully resumed, skip all other timer creation logic
+        if (!resumed) {
+            console.log('Resume failed, will create new timer if parameters exist');
+            checkForResumableSessions();
+        } else {
+            console.log('Timer successfully resumed, skipping new timer creation');
+        }
+    } else if (!urlParams.has('days') && !urlParams.has('hours') && 
+               !urlParams.has('minutes') && !urlParams.has('seconds') &&
+               !urlParams.has('date')) {
+        // Only check for resumable sessions if we're not creating a new timer
         checkForResumableSessions();
     }
     
@@ -265,215 +504,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Total duration (ms):', totalDuration);
     console.log('Is date-based timer:', isDateBasedTimer);
     console.log('Mobile optimized:', mobileOptimized && isMobileDevice());
-    
-    // Standard display elements
-    const daysElement = document.getElementById('days');
-    const hoursElement = document.getElementById('hours');
-    const minutesElement = document.getElementById('minutes');
-    const secondsElement = document.getElementById('seconds');
-    
-    const daysContainer = document.getElementById('days-container');
-    const hoursContainer = document.getElementById('hours-container');
-    const minutesContainer = document.getElementById('minutes-container');
-    const secondsContainer = document.getElementById('seconds-container');
-    
-    // Compact display elements
-    const compactDaysElement = document.getElementById('compact-days');
-    const compactHoursElement = document.getElementById('compact-hours');
-    const compactMinutesElement = document.getElementById('compact-minutes');
-    const compactSecondsElement = document.getElementById('compact-seconds');
-    
-    const daysDelimiter = document.querySelector('.days-delimiter');
-    const hoursDelimiter = document.querySelector('.hours-delimiter');
-    const minutesDelimiter = document.querySelector('.minutes-delimiter');
-    
-    const completeMessage = document.getElementById('complete-message');
-    const resumeBanner = document.getElementById('resume-banner');
-    
-    // Save current timer state for potential resumption
-    function saveTimerState() {
-        try {
-            // Only save if timer is active and NOT a date-based timer
-            if (!isDateBasedTimer && targetDate > getCurrentDate()) {
-                // Calculate current progress percentage
-                let currentProgress = 0;
-                if (originalDuration > 0) {
-                    const now = getCurrentDate();
-                    const remaining = targetDate - now;
-                    const elapsed = originalDuration - remaining;
-                    currentProgress = Math.min(100, (elapsed / originalDuration) * 100);
-                }
-                
-                const timerState = {
-                    // Only for relative timers, store the calculated target date
-                    targetDate: targetDate.toISOString(),
-                    startDate: startDate.toISOString(),
-                    totalDuration: totalDuration,
-                    originalDuration: originalDuration,
-                    
-                    // Store progress percentage
-                    progressPercentage: currentProgress,
-                    
-                    // Store display settings
-                    display: displayMode,
-                    theme: theme,
-                    units: unitsDisplay,
-                    progress: showProgress ? 'true' : 'false',
-                    title: timerTitle || '',
-                    timezone: timezone || '',
-                    mobile: mobileParam || 'true',
-                    savedAt: new Date().toISOString(),
-                    
-                    // Include all color settings
-                    bgcolor: urlParams.get('bgcolor') || '',
-                    textcolor: urlParams.get('textcolor') || '',
-                    timercolor: urlParams.get('timercolor') || '',
-                    labelcolor: urlParams.get('labelcolor') || '',
-                    progresscolor: urlParams.get('progresscolor') || '',
-                    titlecolor: urlParams.get('titlecolor') || '',
-                    completeemoji: urlParams.get('completeemoji') || ''
-                };
-                
-                localStorage.setItem('current_timer', JSON.stringify(timerState));
-            } else if (!isDateBasedTimer) {
-                // Clear saved state if timer is complete
-                localStorage.removeItem('current_timer');
-            }
-        } catch (e) {
-            console.error("Error saving timer state:", e);
-        }
-    }
-    
-    // Resume a previously interrupted countdown (only for non-date-based timers)
-    function resumeCountdown() {
-        try {
-            const savedState = JSON.parse(localStorage.getItem('current_timer'));
-            if (!savedState || !savedState.targetDate) return false;
-            
-            // Make sure the saved state isn't too old (e.g., more than a day)
-            const savedAt = new Date(savedState.savedAt);
-            const now = getCurrentDate();
-            if (now - savedAt > 24 * 60 * 60 * 1000) {
-                localStorage.removeItem('current_timer');
-                return false;
-            }
-            
-            // If the target date has already passed, don't resume
-            const savedTargetDate = createDate(savedState.targetDate);
-            if (savedTargetDate <= now) {
-                localStorage.removeItem('current_timer');
-                return false;
-            }
-            
-            // Set timer variables
-            targetDate = savedTargetDate;
-            startDate = createDate(savedState.startDate);
-            totalDuration = savedState.totalDuration;
-            
-            // Restore original duration for progress calculation
-            originalDuration = savedState.originalDuration || savedState.totalDuration;
-            
-            // Restore saved progress percentage for the progress bar
-            if (savedState.progressPercentage !== undefined && savedState.progressPercentage !== null && showProgress) {
-                progressBar.style.width = savedState.progressPercentage + '%';
-                console.log('Restored progress bar to:', savedState.progressPercentage + '%');
-            }
-            
-            // Apply mobile optimization if needed
-            const savedMobile = savedState.mobile !== 'false';
-            if (savedMobile && isMobileDevice()) {
-                document.body.classList.add('mobile-optimized');
-            } else {
-                document.body.classList.remove('mobile-optimized');
-            }
-            
-            // Apply the saved title if present
-            if (savedState.title) {
-                timerTitleElement.textContent = savedState.title;
-                timerTitleElement.style.display = 'block';
-                document.title = savedState.title + ' - Countdown Timer';
-            }
-            
-            // Apply saved display mode
-            if (savedState.display === 'compact') {
-                standardTimer.style.display = 'none';
-                compactTimer.style.display = 'flex';
-            } else {
-                standardTimer.style.display = 'flex';
-                compactTimer.style.display = 'none';
-            }
-            
-            // Apply saved theme
-            if (savedState.theme === 'dark') {
-                document.body.classList.add('dark-theme');
-            } else {
-                document.body.classList.remove('dark-theme');
-            }
-            
-            // Apply saved progress bar
-            if (savedState.progress === 'true') {
-                progressContainer.style.display = 'block';
-            }
-            
-            // Apply saved colors
-            const colorMappings = [
-                { saved: 'bgcolor', css: '--background-color' },
-                { saved: 'timercolor', css: '--timer-background' },
-                { saved: 'textcolor', css: '--text-color' },
-                { saved: 'labelcolor', css: '--label-color' },
-                { saved: 'progresscolor', css: '--progress-color' },
-                { saved: 'titlecolor', css: '--title-color' }
-            ];
-            
-            colorMappings.forEach(mapping => {
-                if (savedState[mapping.saved]) {
-                    document.documentElement.style.setProperty(mapping.css, '#' + savedState[mapping.saved]);
-                }
-            });
-            
-            // Hide the resume banner
-            resumeBanner.style.display = 'none';
-            
-            return true;
-        } catch (e) {
-            console.error("Error resuming countdown:", e);
-            return false;
-        }
-    }
-    
-    // Check if there's a saved timer that can be resumed
-    function checkForResumableSessions() {
-        try {
-            const savedState = JSON.parse(localStorage.getItem('current_timer'));
-            if (!savedState || !savedState.targetDate) return;
-            
-            // Only handle non-date-based timers
-            const savedTargetDate = createDate(savedState.targetDate);
-            const savedAt = new Date(savedState.savedAt);
-            const now = getCurrentDate();
-            
-            // If timer is still valid (not expired, not too old)
-            if (savedTargetDate > now && (now - savedAt < 24 * 60 * 60 * 1000)) {
-                showResumeBanner(savedState);
-            } else {
-                // Clean up expired timer data
-                localStorage.removeItem('current_timer');
-            }
-        } catch (e) {
-            console.error("Error checking for resumable sessions:", e);
-        }
-    }
-    
-    // Helper function to show the resume banner
-    function showResumeBanner(savedState) {
-        resumeBanner.style.display = 'block';
-        
-        // Add the timer title to the resume banner if it exists
-        if (savedState.title) {
-            const resumeText = resumeBanner.querySelector('p');
-            resumeText.innerHTML = `"${savedState.title}" timer was interrupted. <a href="?resume=true">Resume?</a>`;
-        }
-    }
     
     // Update timer function
     function updateTimer() {
