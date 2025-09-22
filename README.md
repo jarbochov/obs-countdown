@@ -4,11 +4,11 @@ A clean, customizable countdown timer that can be configured entirely through UR
 
 ## Demo
 
-Try it live at: [countdown.example.com](https://countdown.example.com)
+Try it live at: [wyomingjarbo.com/countdown](https://wyomingjarbo.com/countdown)
 
 ## Usage
 
-Simply open `index.html` in a browser, or use URL parameters to customize the timer: https://path-to-timer/index.html?minutes=10&theme=dark
+Simply open `index.html` in a browser, or use URL parameters to customize the timer: https://wyomingjarbo.com/countdown/index.html?minutes=10&theme=dark
 
 
 ## URL Parameters
@@ -121,9 +121,6 @@ When using `POST` method, a JSON payload is sent with the event type and timesta
 13. **Call a webhook with POST and delay**: `?minutes=1&webhookurl=https://example.com/api/timer-done&webhookmethod=POST&webhookdelay=2`
 
 
-
-
-
 ## OBS Integration Tips
 
 For best results when using as an OBS Browser Source:
@@ -135,6 +132,23 @@ For best results when using as an OBS Browser Source:
 ```css
 body { background-color: rgba(0, 0, 0, 0) !important; }
 ```
+
+## Configuration Wizard
+
+For users who prefer a visual way to configure the timer, a user-friendly configuration wizard is available:
+
+1. Navigate to the [Countdown Timer Wizard](https://wyomingjarbo.com/countdown/wizard/)
+2. Configure your timer using the intuitive interface:
+   - Set time duration or target date/time
+   - Choose display options (theme, format, colors)
+   - Configure advanced features (redirects, webhooks)
+3. The wizard generates your custom URL in real-time
+4. Use the "Copy URL" button to copy the configuration to your clipboard
+5. Click "Test Timer" to preview your configuration in a new window
+
+This wizard makes it easy for non-technical users to create customized countdown timers without needing to understand URL parameters.
+
+
 
 ## Technical Details
 

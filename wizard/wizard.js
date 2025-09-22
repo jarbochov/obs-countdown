@@ -63,9 +63,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Function to get base URL
-    function getBaseUrl() {
-        // Change this to match your deployment URL
-        return window.location.href.replace(/\/[^\/]*$/, '/index.html');
+function getBaseUrl() {
+        // If your timer is at the root of your site:
+        return window.location.href.replace(/\/wizard\/.*$/, '/index.html');
+        
+        // Or if you need a specific URL:
+        // return "https://your-domain.com/index.html";
     }
     
     // Function to update URL output
