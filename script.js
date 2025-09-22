@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-        // Add showonend parameter: 'zero' or 'none'
-        const showOnEnd = urlParams.get('showonend') || 'none';
+    // Add showonend parameter: 'zero' or 'none' or 'message' (default)
+    const showOnEnd = urlParams.get('showonend') || 'message';
     let targetDate;
     let startDate;
     let countdownInterval;
@@ -236,7 +236,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     labelcolor: urlParams.get('labelcolor') || '',
                     progresscolor: urlParams.get('progresscolor') || '',
                     titlecolor: urlParams.get('titlecolor') || '',
-                    completeemoji: urlParams.get('completeemoji') || ''
+                    
+                    // Get endmessage parameter, with fallback to completeemoji for backwards compatibility
+                    endmessage: urlParams.get('endmessage') || urlParams.get('completeemoji') || '',
+                    
+                    // Save showonend parameter
+                    showonend: showOnEnd
                 };
                 
                 localStorage.setItem('current_timer', JSON.stringify(timerState));
@@ -506,6 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Total duration (ms):', totalDuration);
     console.log('Is date-based timer:', isDateBasedTimer);
     console.log('Mobile optimized:', mobileOptimized && isMobileDevice());
+    console.log('Show on end mode:', showOnEnd);
     
     // Update timer function
     function updateTimer() {
@@ -515,37 +521,57 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if countdown is complete
         if (difference <= 0) {
             clearInterval(countdownInterval);
-                if (showOnEnd === 'zero') {
-                    // Show zeroes in both displays
-                    daysElement.textContent = '00';
-                    hoursElement.textContent = '00';
-                    minutesElement.textContent = '00';
-                    secondsElement.textContent = '00';
-                    compactDaysElement.textContent = '00';
-                    compactHoursElement.textContent = '00';
-                    compactMinutesElement.textContent = '00';
-                    compactSecondsElement.textContent = '00';
-                    // Show timer, hide complete message
-                    standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
-                    compactTimer.style.display = displayMode === 'compact' ? 'flex' : 'none';
-                    progressContainer.style.display = 'none';
-                    timerTitleElement.style.display = 'none';
-                    completeMessage.style.display = 'none';
-                } else {
-                    // Hide timer, show complete message
-                    standardTimer.style.display = 'none';
-                    compactTimer.style.display = 'none';
-                    progressContainer.style.display = 'none';
-                    timerTitleElement.style.display = 'none';
-                    completeMessage.style.display = 'block';
-                    // Custom emoji for completion if provided
-                    if (urlParams.has('completeemoji')) {
-                        completeMessage.textContent = decodeURIComponent(urlParams.get('completeemoji'));
+            
+            // Handle different showOnEnd modes
+            if (showOnEnd === 'zero') {
+                // Show zeroes in both displays
+                daysElement.textContent = '00';
+                hoursElement.textContent = '00';
+                minutesElement.textContent = '00';
+                secondsElement.textContent = '00';
+                compactDaysElement.textContent = '00';
+                compactHoursElement.textContent = '00';
+                compactMinutesElement.textContent = '00';
+                compactSecondsElement.textContent = '00';
+                
+                // Show timer, hide complete message
+                standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
+                compactTimer.style.display = displayMode === 'compact' ? 'flex' : 'none';
+                progressContainer.style.display = 'none';
+                timerTitleElement.style.display = 'none';
+                completeMessage.style.display = 'none';
+            } 
+            else if (showOnEnd === 'none') {
+                // Show absolutely nothing
+                standardTimer.style.display = 'none';
+                compactTimer.style.display = 'none';
+                progressContainer.style.display = 'none';
+                timerTitleElement.style.display = 'none';
+                completeMessage.style.display = 'none';
+            }
+            else {
+                // Default: Show endmessage
+                standardTimer.style.display = 'none';
+                compactTimer.style.display = 'none';
+                progressContainer.style.display = 'none';
+                timerTitleElement.style.display = 'none';
+                completeMessage.style.display = 'block';
+                
+                // Get endmessage parameter, with fallback to completeemoji for backwards compatibility
+                if (urlParams.has('endmessage') || urlParams.has('completeemoji')) {
+                    const endMessage = urlParams.get('endmessage') || urlParams.get('completeemoji');
+                    completeMessage.textContent = decodeURIComponent(endMessage);
+                    
+                    // Log deprecation warning if old parameter is used
+                    if (urlParams.has('completeemoji') && !urlParams.has('endmessage')) {
+                        console.log('Note: "completeemoji" parameter is deprecated. Please use "endmessage" instead.');
                     }
                 }
-                // Clear the saved timer state
-                localStorage.removeItem('current_timer');
-                return;
+            }
+            
+            // Clear the saved timer state
+            localStorage.removeItem('current_timer');
+            return;
         }
         
         // Calculate time units

@@ -38,7 +38,8 @@ Multiple time units can be combined: `?days=1&hours=12`
 | `units` | Control time unit display | `auto` (default), `full` |
 | `progress` | Show progress bar | `true`, `false` (default) |
 | `title` | Add a title above the timer | `?title=Meeting%20Timer` |
-| `completeemoji` | Custom emoji when timer completes | `?completeemoji=🎉` (default: ⌛️) |
+| `endmessage` | Custom text or emoji shown when timer completes | `?endmessage=🎉` (default: ⌛️) |
+| `showonend` | Control what to display when timer ends | `message` (default, shows endmessage), `zero` (shows 00:00), `none` (shows nothing) |
 | `resume` | Resume interrupted timer | `true`, `false` (default) |
 | `mobile` | Control mobile optimization | `true` (default), `false` |
 
@@ -107,12 +108,27 @@ The timer uses localStorage to allow resuming interrupted timers that are create
    index.html?minutes=45&theme=dark&display=compact&progress=true&title=My%20Talk&bgcolor=2c3e50&progresscolor=e74c3c
    ```
 
-5. **Resume an interrupted timer**:
+5. **Custom end message when timer completes**:
+   ```
+   index.html?minutes=5&endmessage=DONE!
+   ```
+
+6. **Show zeros when timer ends**:
+   ```
+   index.html?minutes=2&showonend=zero
+   ```
+
+7. **Show nothing when timer ends**:
+   ```
+   index.html?minutes=2&showonend=none
+   ```
+
+8. **Resume an interrupted timer**:
    ```
    index.html?resume=true
    ```
 
-6. **Event timer with mobile optimization disabled**:
+9. **Event timer with mobile optimization disabled**:
    ```
    index.html?date=2023-10-15T09:00:00&title=Event%20Start&mobile=false
    ```
@@ -137,6 +153,11 @@ For best results when using as an OBS Browser Source:
 - Uses the Intl.DateTimeFormat API for timezone support
 - Uses localStorage for timer state persistence (resume feature for duration-based timers)
 - Font scaling that works well across all device sizes
+
+## Notes
+
+- The `completeemoji` parameter has been renamed to `endmessage` to better reflect its purpose, as it now supports both text and emoji characters.
+- The old parameter name is still supported for backward compatibility.
 
 ## License
 
