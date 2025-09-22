@@ -257,15 +257,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Save redirect parameters
                     redirecturl: redirectUrl || '',
                     redirectdelay: urlParams.get('redirectdelay') || '',
-
+    
                     // Save highest unit used for proper display restoration
                     highestUnitUsed: highestUnitUsed
                 };
                 
                 localStorage.setItem('current_timer', JSON.stringify(timerState));
+                console.log('Timer state saved with highest unit:', highestUnitUsed);
             } else if (!isDateBasedTimer) {
                 // Clear saved state if timer is complete
                 localStorage.removeItem('current_timer');
+                console.log('Timer complete or invalid, cleared saved state');
             }
         } catch (e) {
             console.error("Error saving timer state:", e);
@@ -320,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Restore highest unit used for units=full display
             highestUnitUsed = savedState.highestUnitUsed || 'seconds';
+            console.log('Restored highest unit used:', highestUnitUsed); // Add this debug line
             
             // Calculate new progress percentage
             if (originalDuration > 0 && showProgress) {
@@ -421,6 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Helper function to show the resume banner
     function showResumeBanner(savedState) {
+        console.log('Showing resume banner for timer:', savedState.title || 'Untitled timer');
         resumeBanner.style.display = 'block';
         
         // Add the timer title to the resume banner if it exists
@@ -465,7 +469,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // IMPORTANT: Check for resume conditions BEFORE creating a new timer
     // This is critical to fix the resume functionality when refreshing the page
-    if (urlParams.has('resume') && urlParams.get('resume') === 'true' && !urlParams.has('date')) {
+
+    if (urlParams.has('resume') && urlParams.get('resume') === 'true') {
+        // Remove the !urlParams.has('date') condition that was preventing resume
         const resumed = resumeCountdown();
         
         // If successfully resumed, skip all other timer creation logic
