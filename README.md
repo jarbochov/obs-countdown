@@ -108,7 +108,7 @@ When using `POST` method, a JSON payload is sent with the event type and timesta
   "event": "timer_complete",
   "timestamp": "2023-04-15T12:00:00.000Z"
 }
-
+```
 
 
 ## Examples
