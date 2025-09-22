@@ -62,6 +62,8 @@ All color parameters accept hex color codes **without** the # symbol.
 | `progresscolor` | Progress bar color | `?progresscolor=4caf50` |
 | `titlecolor` | Title text color | `?titlecolor=333333` |
 
+**Note:** Custom color parameters currently work best with `theme=light` (default theme). When using `theme=dark`, the dark theme's predefined colors will take precedence over custom color settings.
+
 ## Timezone Support
 
 The timer supports specifying a timezone to ensure consistent countdown behavior regardless of where it's viewed:
