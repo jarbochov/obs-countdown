@@ -85,6 +85,25 @@ The timer uses localStorage to allow resuming interrupted timers that are create
 - Resumable timers expire after 24 hours
 - Note: Date-based timers (using the `date` parameter) do not support resumption
 
+## Webhook Integration
+
+The timer can call a webhook URL when the countdown completes, useful for integrating with external systems like Bitfocus Companion:
+
+| Parameter | Description | Values |
+|-----------|-------------|--------|
+| `webhookurl` | URL to call when timer completes | `?webhookurl=https://example.com/api/hook` |
+| `webhookmethod` | HTTP method to use for webhook call | `GET` (default), `POST` |
+| `webhookdelay` | Seconds to wait before calling webhook | `?webhookdelay=2` (default: 0) |
+
+When using `POST` method, a JSON payload is sent with the event type and timestamp:
+```json
+{
+  "event": "timer_complete",
+  "timestamp": "2023-04-15T12:00:00.000Z"
+}
+
+
+
 ## Examples
 
 1. **10-minute timer with dark theme and title**:
@@ -98,6 +117,11 @@ The timer uses localStorage to allow resuming interrupted timers that are create
 9. **Event timer with mobile optimization disabled**:
 10. **Redirect to a URL when timer completes**:
 11. **Redirect with a 3-second delay**:
+12. **Call a webhook when timer completes**: `?minutes=5&webhookurl=https://example.com/api/timer-done`
+13. **Call a webhook with POST and delay**: `?minutes=1&webhookurl=https://example.com/api/timer-done&webhookmethod=POST&webhookdelay=2`
+
+
+
 
 
 ## OBS Integration Tips

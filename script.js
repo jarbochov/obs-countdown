@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add redirect parameters
     const redirectUrl = urlParams.get('redirecturl');
     const redirectDelay = urlParams.has('redirectdelay') ? parseInt(urlParams.get('redirectdelay')) * 1000 : 1000; // Default 1 second delay
+    // Webhook parameters
+    const webhookUrl = urlParams.get('webhookurl');
+    const webhookMethod = urlParams.get('webhookmethod') || 'GET'; // Default to GET
+    const webhookDelay = urlParams.has('webhookdelay') ? parseInt(urlParams.get('webhookdelay')) * 1000 : 0; // Default to no delay
+    
+    
     
     let targetDate;
     let startDate;
@@ -417,6 +423,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Webhook Function
+    function callWebhook(url, method) {
+        console.log(`Calling webhook: ${method} ${url}`);
+        
+        if (method.toUpperCase() === 'GET') {
+            fetch(url, { method: 'GET' })
+                .then(response => {
+                    console.log('Webhook called successfully:', response.status);
+                })
+                .catch(error => {
+                    console.error('Error calling webhook:', error);
+                });
+        } else if (method.toUpperCase() === 'POST') {
+            fetch(url, { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    event: 'timer_complete',
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(response => {
+                console.log('Webhook called successfully:', response.status);
+            })
+            .catch(error => {
+                console.error('Error calling webhook:', error);
+            });
+        }
+    }
+    
+    
     // IMPORTANT: Check for resume conditions BEFORE creating a new timer
     // This is critical to fix the resume functionality when refreshing the page
     if (urlParams.has('resume') && urlParams.get('resume') === 'true' && !urlParams.has('date')) {
@@ -584,6 +623,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     window.location.href = redirectUrl;
                 }, redirectDelay);
+            }
+            //  Redirect if Webhook URL is specified
+            if (webhookUrl) {
+                setTimeout(() => {
+                    callWebhook(webhookUrl, webhookMethod);
+                }, webhookDelay);
             }
             
             // Clear the saved timer state
