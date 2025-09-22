@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Timer title (hidden by default) -->
+        <div id="timer-title" style="display: none;"></div>
+        
+        <div id="timer" class="standard-display">
+            <div id="days-container" class="time-segment">
+                <span id="days">00</span>
+                <span class="label">Days</span>
+            </div>
+            <div id="hours-container" class="time-segment">
+                <span id="hours">00</span>
+                <span class="label">Hours</span>
+            </div>
+            <div id="minutes-container" class="time-segment">
+                <span id="minutes">00</span>
+                <span class="label">Minutes</span>
+            </div>
+            <div id="seconds-container" class="time-segment">
+                <span id="seconds">00</span>
+                <span class="label">Seconds</span>
+            </div>
+        </div>
+
+        <!-- Compact display version -->
+        <div id="compact-timer" class="compact-display" style="display: none;">
+            <span id="compact-days">00</span><span class="delimiter days-delimiter">:</span>
+            <span id="compact-hours">00</span><span class="delimiter hours-delimiter">:</span>
+            <span id="compact-minutes">00</span><span class="delimiter minutes-delimiter">:</span>
+            <span id="compact-seconds">00</span>
+        </div>
+
+        <div id="progress-container" style="display: none;">
+            <div id="progress-bar"></div>
+        </div>
+        
+        <div id="complete-message" style="display: none;">
+            ⌛️
+        </div>
+        
+        <!-- Resume banner (only shown when a timer can be resumed) -->
+        <div class="resume-banner" id="resume-banner" style="display: none;">
+            <p>Timer was interrupted. <a href="?resume=true">Resume?</a></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

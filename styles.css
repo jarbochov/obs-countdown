@@ -1,0 +1,315 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+:root {
+    --background-color: #f5f5f5;
+    --timer-background: #ffffff;
+    --text-color: #333333;
+    --label-color: #666666;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --progress-color: #4caf50;
+    --progress-background: #e0e0e0;
+    --title-color: #333333;
+}
+
+.dark-theme {
+    --background-color: #121212;
+    --timer-background: #1e1e1e;
+    --text-color: #f0f0f0;
+    --label-color: #bbbbbb;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --progress-background: #333333;
+    --title-color: #f0f0f0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    width: 100%;
+    font-family: 'Arial', sans-serif;
+    background-color: var(--background-color);
+    transition: background-color 0.3s ease;
+    overflow: hidden; /* Prevent scrollbars */
+}
+
+.container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: min(3vh, 30px); /* Clamped padding */
+}
+
+/* Timer title styles */
+#timer-title {
+    font-size: clamp(1.5rem, 5vh, 3rem);
+    font-weight: bold;
+    color: var(--title-color);
+    margin-bottom: clamp(10px, 3vh, 30px);
+    text-align: center;
+    transition: color 0.3s ease;
+    max-width: 90vw;
+    line-height: 1.2;
+}
+
+/* Timezone indicator */
+.timezone-indicator {
+    font-size: clamp(0.8rem, 2.5vh, 1.5rem);
+    color: var(--label-color);
+    margin-top: clamp(5px, 0.5vh, 10px);
+    font-weight: normal;
+}
+
+/* Progress bar styles */
+#progress-container {
+    width: 80%;
+    max-width: 80vw;
+    height: clamp(6px, 1.5vh, 12px);
+    background-color: var(--progress-background);
+    border-radius: clamp(2px, 0.5vh, 6px);
+    margin: clamp(10px, 3vh, 30px) 0;
+    overflow: hidden;
+}
+
+#progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--progress-color);
+    border-radius: clamp(2px, 0.5vh, 6px);
+    transition: width 0.5s ease;
+}
+
+/* Standard display styles */
+.standard-display {
+    display: flex;
+    gap: clamp(10px, 3vw, 30px);
+    background-color: var(--timer-background);
+    padding: clamp(15px, 5vh, 50px) clamp(15px, 5vw, 50px);
+    border-radius: clamp(10px, 2vh, 20px);
+    box-shadow: 0 clamp(2px, 0.5vh, 8px) clamp(5px, 2vh, 20px) var(--shadow-color);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    min-height: 30vh;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Add scaling classes */
+.standard-display.days-only {
+    /* When only showing days */
+    padding: clamp(20px, 6vh, 60px) clamp(20px, 8vw, 80px);
+}
+
+.standard-display.short-timer {
+    /* For timers with fewer units */
+    padding: clamp(15px, 5vh, 50px) clamp(10px, 4vw, 40px);
+}
+
+.time-segment {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: clamp(60px, 15vw, 150px);
+}
+
+/* Days-only mode will have larger numbers */
+.days-only .time-segment {
+    min-width: clamp(120px, 30vw, 300px);
+}
+
+/* Short timer will have narrower segments */
+.short-timer .time-segment {
+    min-width: clamp(40px, 10vw, 100px);
+}
+
+#days, #hours, #minutes, #seconds {
+    font-size: clamp(2.5rem, 12vh, 8rem); /* Base size with clamp */
+    font-weight: bold;
+    line-height: 1;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+/* Different sizes based on context */
+.days-only #days {
+    font-size: clamp(3rem, 20vh, 12rem);
+}
+
+.short-timer #hours, 
+.short-timer #minutes, 
+.short-timer #seconds {
+    font-size: clamp(3rem, 15vh, 10rem);
+}
+
+.label {
+    font-size: clamp(0.8rem, 3vh, 1.8rem);
+    color: var(--label-color);
+    margin-top: clamp(5px, 1vh, 10px);
+    transition: color 0.3s ease;
+}
+
+.days-only .label {
+    font-size: clamp(1rem, 4vh, 2rem);
+}
+
+/* Compact display styles */
+.compact-display {
+    background-color: var(--timer-background);
+    padding: clamp(15px, 5vh, 50px) clamp(15px, 5vw, 50px);
+    border-radius: clamp(10px, 2vh, 20px);
+    box-shadow: 0 clamp(2px, 0.5vh, 8px) clamp(5px, 2vh, 20px) var(--shadow-color);
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 0;
+    font-weight: bold;
+    color: var(--text-color);
+    transition: color 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.compact-display.days-only {
+    padding: clamp(20px, 6vh, 60px) clamp(20px, 6vw, 60px);
+}
+
+.compact-display.short-timer {
+    padding: clamp(15px, 4vh, 40px) clamp(15px, 4vw, 40px);
+}
+
+#compact-days, #compact-hours, #compact-minutes, #compact-seconds, .delimiter {
+    font-size: clamp(2.5rem, 15vh, 9rem); /* Base size with clamp */
+    line-height: 1;
+}
+
+/* Different sizes based on context */
+.days-only #compact-days {
+    font-size: clamp(3rem, 20vh, 12rem);
+}
+
+.short-timer #compact-hours,
+.short-timer #compact-minutes,
+.short-timer #compact-seconds {
+    font-size: clamp(3rem, 18vh, 11rem);
+}
+
+.delimiter {
+    margin: 0 clamp(-3px, -0.6vw, -6px);
+    color: var(--text-color);
+}
+
+#complete-message {
+    font-size: clamp(3rem, 15vh, 9rem);
+    font-weight: bold;
+    color: var(--text-color);
+    margin-top: clamp(10px, 3vh, 30px);
+    transition: color 0.3s ease;
+}
+
+.resume-banner {
+    background-color: var(--timer-background);
+    padding: clamp(8px, 2vh, 20px) clamp(10px, 3vw, 30px);
+    border-radius: clamp(5px, 1vh, 10px);
+    text-align: center;
+    margin-top: clamp(10px, 3vh, 30px);
+    box-shadow: 0 clamp(1px, 0.3vh, 3px) clamp(3px, 1vh, 10px) var(--shadow-color);
+    font-size: clamp(0.9rem, 2.5vh, 1.5rem);
+}
+
+.resume-banner a {
+    color: var(--progress-color);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.resume-banner a:hover {
+    text-decoration: underline;
+}
+
+/* Mobile-specific styles */
+.mobile-optimized .standard-display {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 15px;
+}
+
+.mobile-optimized .time-segment {
+    min-width: 70px;
+    margin: 0 5px;
+}
+
+.mobile-optimized #days, 
+.mobile-optimized #hours, 
+.mobile-optimized #minutes, 
+.mobile-optimized #seconds {
+    font-size: clamp(2rem, 8vh, 3.5rem);
+}
+
+.mobile-optimized .label {
+    font-size: clamp(0.7rem, 2vh, 1rem);
+}
+
+.mobile-optimized .compact-display {
+    padding: 20px 15px;
+}
+
+.mobile-optimized #compact-days, 
+.mobile-optimized #compact-hours, 
+.mobile-optimized #compact-minutes, 
+.mobile-optimized #compact-seconds, 
+.mobile-optimized .delimiter {
+    font-size: clamp(2rem, 8vh, 3.5rem);
+}
+
+.mobile-optimized #timer-title {
+    font-size: clamp(1.2rem, 4vh, 2rem);
+    margin-bottom: 15px;
+}
+
+.mobile-optimized .timezone-indicator {
+    font-size: clamp(0.7rem, 2vh, 1rem);
+}
+
+.mobile-optimized #progress-container {
+    height: 8px;
+    width: 90%;
+}
+
+.mobile-optimized #complete-message {
+    font-size: clamp(2.5rem, 10vh, 5rem);
+}
+
+/* Ensure timer is visible even on the smallest screens */
+@media (max-height: 400px) {
+    .standard-display, .compact-display {
+        padding: 10px 15px;
+    }
+    
+    #days, #hours, #minutes, #seconds {
+        font-size: clamp(1.5rem, 10vh, 2.5rem);
+    }
+    
+    .label {
+        font-size: clamp(0.6rem, 2vh, 0.9rem);
+    }
+    
+    #compact-days, #compact-hours, #compact-minutes, #compact-seconds, .delimiter {
+        font-size: clamp(1.5rem, 10vh, 2.5rem);
+    }
+    
+    #timer-title {
+        font-size: clamp(1rem, 4vh, 1.5rem);
+        margin-bottom: 8px;
+    }
+    
+    #progress-container {
+        height: 4px;
+        margin: 8px 0;
+    }
+}
