@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer Configuration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="wizard.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Countdown Timer Configuration</h1>
+            <p>Configure your countdown timer with this easy-to-use wizard</p>
+        </header>
+        
+        <main>
+            <div class="wizard-container">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="time">Time</button>
+                    <button class="tab-btn" data-tab="display">Display</button>
+                    <button class="tab-btn" data-tab="colors">Colors</button>
+                    <button class="tab-btn" data-tab="advanced">Advanced</button>
+                </div>
+                
+                <div class="tab-content">
+                    <!-- TIME CONFIGURATION TAB -->
+                    <div class="tab-pane active" id="time-tab">
+                        <h2>Time Configuration</h2>
+                        
+                        <div class="option-group">
+                            <label class="option-label">Timer Type:</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="timer-type" value="duration" checked>
+                                    Duration (count down from a time period)
+                                </label>
+                                <label>
+                                    <input type="radio" name="timer-type" value="date">
+                                    Target Date (count down to a specific date/time)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Duration settings (shown by default) -->
+                        <div id="duration-settings">
+                            <div class="option-group time-inputs">
+                                <div class="time-input">
+                                    <label for="days">Days</label>
+                                    <input type="number" id="days" min="0" value="0">
+                                </div>
+                                <div class="time-input">
+                                    <label for="hours">Hours</label>
+                                    <input type="number" id="hours" min="0" max="23" value="0">
+                                </div>
+                                <div class="time-input">
+                                    <label for="minutes">Minutes</label>
+                                    <input type="number" id="minutes" min="0" max="59" value="5">
+                                </div>
+                                <div class="time-input">
+                                    <label for="seconds">Seconds</label>
+                                    <input type="number" id="seconds" min="0" max="59" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Date settings (hidden by default) -->
+                        <div id="date-settings" style="display: none;">
+                            <div class="option-group">
+                                <label for="target-date">Target Date:</label>
+                                <input type="date" id="target-date">
+                            </div>
+                            <div class="option-group">
+                                <label for="target-time">Target Time:</label>
+                                <input type="time" id="target-time">
+                            </div>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="timezone">Timezone (optional):</label>
+                            <select id="timezone">
+                                <option value="">Use browser's timezone</option>
+                                <optgroup label="Common Timezones">
+                                    <option value="America/New_York">Eastern Time (ET)</option>
+                                    <option value="America/Chicago">Central Time (CT)</option>
+                                    <option value="America/Denver">Mountain Time (MT)</option>
+                                    <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                                    <option value="Europe/London">London (GMT/BST)</option>
+                                    <option value="Europe/Paris">Central European (CET/CEST)</option>
+                                    <option value="Asia/Tokyo">Japan (JST)</option>
+                                    <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- DISPLAY OPTIONS TAB -->
+                    <div class="tab-pane" id="display-tab">
+                        <h2>Display Options</h2>
+                        
+                        <div class="option-group">
+                            <label for="title">Title (optional):</label>
+                            <input type="text" id="title" placeholder="Enter a title for your timer">
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="theme">Theme:</label>
+                            <select id="theme">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="display">Display Format:</label>
+                            <select id="display">
+                                <option value="standard">Standard (with labels)</option>
+                                <option value="compact">Compact (00:00:00:00)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="units">Time Units Display:</label>
+                            <select id="units">
+                                <option value="auto">Auto (hide zero units)</option>
+                                <option value="full">Full (always show all units)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group checkbox">
+                            <label>
+                                <input type="checkbox" id="progress">
+                                Show Progress Bar
+                            </label>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="endmessage">End Message:</label>
+                            <input type="text" id="endmessage" value="⌛️" placeholder="Text or emoji shown when timer completes">
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="showonend">When Timer Ends, Show:</label>
+                            <select id="showonend">
+                                <option value="message">End Message</option>
+                                <option value="zero">Zeros (00:00:00:00)</option>
+                                <option value="none">Nothing (blank screen)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group checkbox">
+                            <label>
+                                <input type="checkbox" id="mobile" checked>
+                                Optimize for Mobile Devices
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- COLORS TAB -->
+                    <div class="tab-pane" id="colors-tab">
+                        <h2>Color Customization</h2>
+                        
+                        <div class="color-options">
+                            <div class="color-option">
+                                <label for="bgcolor">Background Color:</label>
+                                <input type="color" id="bgcolor" value="#f5f5f5">
+                            </div>
+                            
+                            <div class="color-option">
+                                <label for="timercolor">Timer Background:</label>
+                                <input type="color" id="timercolor" value="#ffffff">
+                            </div>
+                            
+                            <div class="color-option">
+                                <label for="textcolor">Timer Text:</label>
+                                <input type="color" id="textcolor" value="#333333">
+                            </div>
+                            
+                            <div class="color-option">
+                                <label for="labelcolor">Label Text:</label>
+                                <input type="color" id="labelcolor" value="#666666">
+                            </div>
+                            
+                            <div class="color-option">
+                                <label for="progresscolor">Progress Bar:</label>
+                                <input type="color" id="progresscolor" value="#4caf50">
+                            </div>
+                            
+                            <div class="color-option">
+                                <label for="titlecolor">Title Text:</label>
+                                <input type="color" id="titlecolor" value="#333333">
+                            </div>
+                        </div>
+                        
+                        <div class="option-group checkbox">
+                            <label>
+                                <input type="checkbox" id="use-default-colors" checked>
+                                Use Theme Default Colors
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- ADVANCED OPTIONS TAB -->
+                    <div class="tab-pane" id="advanced-tab">
+                        <h2>Advanced Options</h2>
+                        
+                        <div class="option-section">
+                            <h3>Redirect Options</h3>
+                            <div class="option-group">
+                                <label for="redirecturl">Redirect URL (optional):</label>
+                                <input type="url" id="redirecturl" placeholder="https://example.com">
+                            </div>
+                            
+                            <div class="option-group">
+                                <label for="redirectdelay">Redirect Delay (seconds):</label>
+                                <input type="number" id="redirectdelay" min="0" value="1">
+                            </div>
+                        </div>
+                        
+                        <div class="option-section">
+                            <h3>Webhook Integration</h3>
+                            <div class="option-group">
+                                <label for="webhookurl">Webhook URL (optional):</label>
+                                <input type="url" id="webhookurl" placeholder="https://example.com/api/hook">
+                            </div>
+                            
+                            <div class="option-group">
+                                <label for="webhookmethod">HTTP Method:</label>
+                                <select id="webhookmethod">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                </select>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label for="webhookdelay">Webhook Delay (seconds):</label>
+                                <input type="number" id="webhookdelay" min="0" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <h2>Your Timer URL</h2>
+                <div class="url-preview">
+                    <code id="url-output">https://your-domain.com/index.html?minutes=5</code>
+                </div>
+                <div class="action-buttons">
+                    <button id="copy-url" class="btn">Copy URL</button>
+                    <button id="test-timer" class="btn primary">Test Timer</button>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Simple Countdown Timer | <a href="https://github.com/jarbochov/obs-countdown" target="_blank">View on GitHub</a></p>
+        </footer>
+    </div>
+    
+    <script src="wizard.js"></script>
+</body>
+</html>
