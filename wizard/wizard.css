@@ -176,6 +176,8 @@ input[type="number"] {
 
 .checkbox input {
     margin-right: 10px;
+    width: 15px;
+    height: 15px;
 }
 
 /* Color Options */
