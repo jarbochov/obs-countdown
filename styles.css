@@ -31,10 +31,19 @@ body, html {
     height: 100%;
     width: 100%;
     font-family: 'Arial', sans-serif;
-    background-color: var(--background-color);
-    transition: background-color 0.3s ease;
+    background-color: transparent;
+    opacity: 0;
+    animation-delay: 0.3s; /* Delay before showing background */
+    animation: fadeInBackground 0.3s ease forwards;
     overflow: hidden; /* Prevent scrollbars */
 }
+
+ @keyframes fadeInBackground {
+     to { 
+        opacity: 1; 
+        background-color: var(--background-color); /* Transition to the actual background color */
+     }
+ }
 
 .container {
     height: 100%;
@@ -44,6 +53,13 @@ body, html {
     align-items: center;
     flex-direction: column;
     padding: min(3vh, 30px); /* Clamped padding */
+    opacity: 0; 
+    animation: fadeIn 0.1s ease-in forwards;
+    animation-delay: 0.3s; /* Match the background transition delay */
+}
+
+ @keyframes fadeIn {
+    to { opacity: 1; }
 }
 
 /* Timer title styles */

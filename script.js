@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const webhookMethod = urlParams.get('webhookmethod') || 'GET'; // Default to GET
     const webhookDelay = urlParams.has('webhookdelay') ? parseInt(urlParams.get('webhookdelay')) * 1000 : 0; // Default to no delay
     const webhookCors = urlParams.get('webhookcors') || 'default'; // 'default' or 'no-cors'
-    
+
     
     let targetDate;
     let startDate;

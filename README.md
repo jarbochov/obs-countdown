@@ -159,7 +159,6 @@ For better readability on varied backgrounds, add text shadow:
 .label, #timer-title { text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important; }
 ```
 
-
 ## Configuration Wizard
 
 For users who prefer a visual way to configure the timer, a user-friendly configuration wizard is available:
