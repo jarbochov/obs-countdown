@@ -50,20 +50,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const useDefaultColors = document.getElementById('use-default-colors');
     const colorInputs = document.querySelectorAll('.color-option input');
     
-    useDefaultColors.addEventListener('change', () => {
+    if (useDefaultColors) {
+        useDefaultColors.addEventListener('change', () => {
+            colorInputs.forEach(input => {
+                input.disabled = useDefaultColors.checked;
+            });
+            updateUrlOutput();
+        });
+        
+        // Initial state for color inputs
         colorInputs.forEach(input => {
             input.disabled = useDefaultColors.checked;
         });
-        updateUrlOutput();
-    });
-    
-    // Initial state for color inputs
-    colorInputs.forEach(input => {
-        input.disabled = useDefaultColors.checked;
-    });
+    }
+
+    // Font scale readout
+    const fontScaleInput = document.getElementById('fontscale');
+    const fontScaleValue = document.getElementById('fontscale-value');
+    if (fontScaleInput && fontScaleValue) {
+        const updateFontScaleReadout = () => {
+            const val = parseFloat(fontScaleInput.value);
+            fontScaleValue.textContent = `${isNaN(val) ? '1.00' : val.toFixed(2)}x`;
+        };
+        fontScaleInput.addEventListener('input', updateFontScaleReadout);
+        fontScaleInput.addEventListener('change', updateFontScaleReadout);
+        updateFontScaleReadout();
+    }
     
     // Function to get base URL
-function getBaseUrl() {
+    function getBaseUrl() {
         // If your timer is at the root of your site:
         return window.location.href.replace(/\/wizard\/.*$/, '/index.html');
         
@@ -153,12 +168,24 @@ function getBaseUrl() {
         if (!document.getElementById('mobile').checked) {
             urlParams.append('mobile', 'false');
         }
+
+        // Style options
+        // Font scale: only include when not the default 1.0
+        if (fontScaleInput) {
+            const fs = parseFloat(fontScaleInput.value);
+            if (!isNaN(fs) && Math.abs(fs - 1) > 0.0001) {
+                const formatted = Math.round(fs * 100) / 100; // up to 2 decimals
+                urlParams.append('fontscale', String(formatted));
+            }
+        }
         
         // Color customization
-        if (!useDefaultColors.checked) {
+        if (!useDefaultColors || (useDefaultColors && !useDefaultColors.checked)) {
             // Helper function to strip # from color values and only add if different from defaults
             function addColorParam(paramName, inputId, defaultValue) {
-                const colorValue = document.getElementById(inputId).value.substring(1);
+                const el = document.getElementById(inputId);
+                if (!el) return;
+                const colorValue = el.value.substring(1);
                 if (colorValue.toLowerCase() !== defaultValue.toLowerCase()) {
                     urlParams.append(paramName, colorValue);
                 }

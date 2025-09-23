@@ -9,6 +9,7 @@
     --progress-color: #4caf50;
     --progress-background: #e0e0e0;
     --title-color: #333333;
+    --font-scale: 1; 
 }
 
 .dark-theme {
@@ -64,10 +65,10 @@ body, html {
 
 /* Timer title styles */
 #timer-title {
-    font-size: clamp(1.5rem, 5vh, 3rem);
+    font-size: calc(clamp(1.5rem, 5vh, 3rem) * var(--font-scale));
     font-weight: bold;
     color: var(--title-color);
-    margin-bottom: clamp(10px, 3vh, 30px);
+    margin-bottom: calc(clamp(10px, 3vh, 30px) * var(--font-scale));
     text-align: center;
     transition: color 0.3s ease;
     max-width: 90vw;
@@ -76,9 +77,9 @@ body, html {
 
 /* Timezone indicator */
 .timezone-indicator {
-    font-size: clamp(0.8rem, 2.5vh, 1.5rem);
+    font-size: calc(clamp(0.8rem, 2.5vh, 1.5rem) * var(--font-scale));
     color: var(--label-color);
-    margin-top: clamp(5px, 0.5vh, 10px);
+    margin-top: calc(clamp(5px, 0.5vh, 10px) * var(--font-scale));
     font-weight: normal;
 }
 
@@ -86,10 +87,10 @@ body, html {
 #progress-container {
     width: 50%;
     max-width: 80vw;
-    height: clamp(6px, 1.5vh, 12px);
+    height: calc(clamp(6px, 1.5vh, 12px) * var(--font-scale));
     background-color: var(--progress-background);
-    border-radius: clamp(2px, 0.5vh, 6px);
-    margin: clamp(10px, 3vh, 30px) 0;
+    border-radius: calc(clamp(2px, 0.5vh, 6px) * var(--font-scale));
+    margin: calc(clamp(10px, 3vh, 30px) * var(--font-scale)) 0;
     overflow: hidden;
 }
 
@@ -97,18 +98,18 @@ body, html {
     height: 100%;
     width: 0%;
     background-color: var(--progress-color);
-    border-radius: clamp(2px, 0.5vh, 6px);
+    border-radius: calc(clamp(2px, 0.5vh, 6px) * var(--font-scale));
     transition: width 0.5s ease;
 }
 
 /* Standard display styles */
 .standard-display {
     display: flex;
-    gap: clamp(10px, 3vw, 30px);
+    gap: calc(clamp(10px, 3vw, 30px) * var(--font-scale));
     background-color: var(--timer-background);
-    padding: clamp(15px, 5vh, 50px) clamp(15px, 5vw, 50px);
-    border-radius: clamp(10px, 2vh, 20px);
-    box-shadow: 0 clamp(2px, 0.5vh, 8px) clamp(5px, 2vh, 20px) var(--shadow-color);
+    padding: calc(clamp(15px, 5vh, 50px) * var(--font-scale)) calc(clamp(15px, 5vw, 50px) * var(--font-scale));
+    border-radius: calc(clamp(10px, 2vh, 20px) * var(--font-scale));
+    box-shadow: 0 calc(clamp(2px, 0.5vh, 8px) * var(--font-scale)) calc(clamp(5px, 2vh, 20px) * var(--font-scale)) var(--shadow-color);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
     min-height: 30vh;
     align-items: center;
@@ -118,12 +119,12 @@ body, html {
 /* Add scaling classes */
 .standard-display.days-only {
     /* When only showing days */
-    padding: clamp(20px, 6vh, 60px) clamp(20px, 8vw, 80px);
+    padding: calc(clamp(20px, 6vh, 60px) * var(--font-scale)) calc(clamp(20px, 8vw, 80px) * var(--font-scale));
 }
 
 .standard-display.short-timer {
     /* For timers with fewer units */
-    padding: clamp(15px, 5vh, 50px) clamp(10px, 4vw, 40px);
+    padding: calc(clamp(15px, 5vh, 50px) * var(--font-scale)) calc(clamp(10px, 4vw, 40px) * var(--font-scale));
 }
 
 .time-segment {
@@ -131,21 +132,21 @@ body, html {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: clamp(60px, 15vw, 150px);
+    min-width: calc(clamp(60px, 15vw, 150px) * var(--font-scale));
 }
 
 /* Days-only mode will have larger numbers */
 .days-only .time-segment {
-    min-width: clamp(120px, 30vw, 300px);
+    min-width: calc(clamp(120px, 30vw, 300px) * var(--font-scale));
 }
 
 /* Short timer will have narrower segments */
 .short-timer .time-segment {
-    min-width: clamp(40px, 10vw, 100px);
+    min-width: calc(clamp(40px, 10vw, 100px) * var(--font-scale));
 }
 
 #days, #hours, #minutes, #seconds {
-    font-size: clamp(2.5rem, 12vh, 8rem); /* Base size with clamp */
+    font-size: calc(clamp(2.5rem, 12vh, 8rem) * var(--font-scale)); /* Base size with clamp */
     font-weight: bold;
     line-height: 1;
     color: var(--text-color);
@@ -154,32 +155,32 @@ body, html {
 
 /* Different sizes based on context */
 .days-only #days {
-    font-size: clamp(3rem, 20vh, 12rem);
+    font-size: calc(clamp(3rem, 20vh, 12rem) * var(--font-scale));
 }
 
 .short-timer #hours, 
 .short-timer #minutes, 
 .short-timer #seconds {
-    font-size: clamp(3rem, 15vh, 10rem);
+    font-size: calc(clamp(3rem, 15vh, 10rem) * var(--font-scale));
 }
 
 .label {
-    font-size: clamp(0.8rem, 3vh, 1.8rem);
+    font-size: calc(clamp(0.8rem, 3vh, 1.8rem) * var(--font-scale));
     color: var(--label-color);
-    margin-top: clamp(5px, 1vh, 10px);
+    margin-top: calc(clamp(5px, 1vh, 10px) * var(--font-scale));
     transition: color 0.3s ease;
 }
 
 .days-only .label {
-    font-size: clamp(1rem, 4vh, 2rem);
+    font-size: calc(clamp(1rem, 4vh, 2rem) * var(--font-scale));
 }
 
 /* Compact display styles */
 .compact-display {
     background-color: var(--timer-background);
-    padding: clamp(15px, 5vh, 50px) clamp(15px, 5vw, 50px);
-    border-radius: clamp(10px, 2vh, 20px);
-    box-shadow: 0 clamp(2px, 0.5vh, 8px) clamp(5px, 2vh, 20px) var(--shadow-color);
+    padding: calc(clamp(15px, 5vh, 50px) * var(--font-scale)) calc(clamp(15px, 5vw, 50px) * var(--font-scale));
+    border-radius: calc(clamp(10px, 2vh, 20px) * var(--font-scale));
+    box-shadow: 0 calc(clamp(2px, 0.5vh, 8px) * var(--font-scale)) calc(clamp(5px, 2vh, 20px) * var(--font-scale)) var(--shadow-color);
     font-family: 'Roboto Mono', monospace !important;
     font-size: 0;
     font-weight: bold;
@@ -191,50 +192,50 @@ body, html {
 }
 
 .compact-display.days-only {
-    padding: clamp(20px, 6vh, 60px) clamp(20px, 6vw, 60px);
+    padding: calc(clamp(20px, 6vh, 60px) * var(--font-scale)) calc(clamp(20px, 6vw, 60px) * var(--font-scale));
 }
 
 .compact-display.short-timer {
-    padding: clamp(15px, 4vh, 40px) clamp(15px, 4vw, 40px);
+    padding: calc(clamp(15px, 4vh, 40px) * var(--font-scale)) calc(clamp(15px, 4vw, 40px) * var(--font-scale));
 }
 
 #compact-days, #compact-hours, #compact-minutes, #compact-seconds, .delimiter {
-    font-size: clamp(2.5rem, 15vh, 9rem); /* Base size with clamp */
+    font-size: calc(clamp(2.5rem, 15vh, 9rem) * var(--font-scale)); /* Base size with clamp */
     line-height: 1;
 }
 
 /* Different sizes based on context */
 .days-only #compact-days {
-    font-size: clamp(3rem, 20vh, 12rem);
+    font-size: calc(clamp(3rem, 20vh, 12rem) * var(--font-scale));
 }
 
 .short-timer #compact-hours,
 .short-timer #compact-minutes,
 .short-timer #compact-seconds {
-    font-size: clamp(3rem, 18vh, 11rem);
+    font-size: calc(clamp(3rem, 18vh, 11rem) * var(--font-scale));
 }
 
 .delimiter {
-    margin: 0 clamp(-3px, -0.6vw, -6px);
+    margin: 0 calc(clamp(-3px, -0.6vw, -6px) * var(--font-scale));
     color: var(--text-color);
 }
 
 #complete-message {
-    font-size: clamp(3rem, 15vh, 9rem);
+    font-size: calc(clamp(3rem, 15vh, 9rem) * var(--font-scale));
     font-weight: bold;
     color: var(--text-color);
-    margin-top: clamp(10px, 3vh, 30px);
+    margin-top: calc(clamp(10px, 3vh, 30px) * var(--font-scale));
     transition: color 0.3s ease;
 }
 
 .resume-banner {
     background-color: var(--timer-background);
-    padding: clamp(8px, 2vh, 20px) clamp(10px, 3vw, 30px);
-    border-radius: clamp(5px, 1vh, 10px);
+    padding: calc(clamp(8px, 2vh, 20px) * var(--font-scale)) calc(clamp(10px, 3vw, 30px) * var(--font-scale));
+    border-radius: calc(clamp(5px, 1vh, 10px) * var(--font-scale));
     text-align: center;
-    margin-top: clamp(10px, 3vh, 30px);
-    box-shadow: 0 clamp(1px, 0.3vh, 3px) clamp(3px, 1vh, 10px) var(--shadow-color);
-    font-size: clamp(0.9rem, 2.5vh, 1.5rem);
+    margin-top: calc(clamp(10px, 3vh, 30px) * var(--font-scale));
+    box-shadow: 0 calc(clamp(1px, 0.3vh, 3px) * var(--font-scale)) calc(clamp(3px, 1vh, 10px) * var(--font-scale)) var(--shadow-color);
+    font-size: calc(clamp(0.9rem, 2.5vh, 1.5rem) * var(--font-scale));
 }
 
 .resume-banner a {
@@ -264,11 +265,11 @@ body, html {
 .mobile-optimized #hours, 
 .mobile-optimized #minutes, 
 .mobile-optimized #seconds {
-    font-size: clamp(2rem, 8vh, 3.5rem);
+    font-size: calc(clamp(2rem, 8vh, 3.5rem) * var(--font-scale));
 }
 
 .mobile-optimized .label {
-    font-size: clamp(0.7rem, 2vh, 1rem);
+    font-size: calc(clamp(0.7rem, 2vh, 1rem) * var(--font-scale));
 }
 
 .mobile-optimized .compact-display {
@@ -280,16 +281,16 @@ body, html {
 .mobile-optimized #compact-minutes, 
 .mobile-optimized #compact-seconds, 
 .mobile-optimized .delimiter {
-    font-size: clamp(2rem, 8vh, 3.5rem);
+    font-size: calc(clamp(2rem, 8vh, 3.5rem) * var(--font-scale));
 }
 
 .mobile-optimized #timer-title {
-    font-size: clamp(1.2rem, 4vh, 2rem);
+    font-size: calc(clamp(1.2rem, 4vh, 2rem) * var(--font-scale));
     margin-bottom: 15px;
 }
 
 .mobile-optimized .timezone-indicator {
-    font-size: clamp(0.7rem, 2vh, 1rem);
+    font-size: calc(clamp(0.7rem, 2vh, 1rem) * var(--font-scale));
 }
 
 .mobile-optimized #progress-container {
@@ -298,7 +299,7 @@ body, html {
 }
 
 .mobile-optimized #complete-message {
-    font-size: clamp(2.5rem, 10vh, 5rem);
+    font-size: calc(clamp(2.5rem, 10vh, 5rem) * var(--font-scale));
 }
 
 /* Ensure timer is visible even on the smallest screens */
@@ -308,19 +309,19 @@ body, html {
     }
     
     #days, #hours, #minutes, #seconds {
-        font-size: clamp(1.5rem, 10vh, 2.5rem);
+        font-size: calc(clamp(1.5rem, 10vh, 2.5rem) * var(--font-scale));
     }
     
     .label {
-        font-size: clamp(0.6rem, 2vh, 0.9rem);
+        font-size: calc(clamp(0.6rem, 2vh, 0.9rem) * var(--font-scale));
     }
     
     #compact-days, #compact-hours, #compact-minutes, #compact-seconds, .delimiter {
-        font-size: clamp(1.5rem, 10vh, 2.5rem);
+        font-size: calc(clamp(1.5rem, 10vh, 2.5rem) * var(--font-scale));
     }
     
     #timer-title {
-        font-size: clamp(1rem, 4vh, 1.5rem);
+        font-size: calc(clamp(1rem, 4vh, 1.5rem) * var(--font-scale));
         margin-bottom: 8px;
     }
     

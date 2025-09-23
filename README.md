@@ -12,7 +12,7 @@ Try it live at: [wyomingjarbo.com/countdown](https://wyomingjarbo.com/countdown)
 
 Simply open `index.html` in a browser, or use URL parameters to customize the timer: https://wyomingjarbo.com/countdown/index.html?minutes=10&theme=dark
 
-
+Made to run locally for OBS browser sources. 
 ## URL Parameters
 
 ### Time Configuration
@@ -53,7 +53,7 @@ When using `units=full`, the timer will show all time units from the highest con
 
 The `auto` setting (default) intelligently hides units that are zero to keep the display clean. For times larger than 1.5 days (36 hours) it will only show the days unit. 
 
-### Color Customization
+### Style Customization
 
 All color parameters accept hex color codes **without** the # symbol.
 
@@ -65,8 +65,11 @@ All color parameters accept hex color codes **without** the # symbol.
 | `labelcolor` | Label text color | `?labelcolor=666666` |
 | `progresscolor` | Progress bar color | `?progresscolor=4caf50` |
 | `titlecolor` | Title text color | `?titlecolor=333333` |
+| `fontscale` | Scales all font sizes | `?fontscale=1.5` |
 
 **Note:** Custom color parameters currently work best with `theme=light` (default theme). When using `theme=dark`, the dark theme's predefined colors will take precedence over custom color settings.
+
+Colors can also accept transparency in the form of an eight digit hex color. (ex. `bgcolor=00000000` would be a fully transparent background.)
 
 ## Timezone Support
 
@@ -173,7 +176,6 @@ For users who prefer a visual way to configure the timer, a user-friendly config
 5. Click "Test Timer" to preview your configuration in a new window
 
 This wizard makes it easy for non-technical users to create customized countdown timers without needing to understand URL parameters.
-
 
 
 ## Technical Details

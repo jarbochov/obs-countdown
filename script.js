@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let originalDuration = 0; // Store the original duration for progress bar calculations
     let isDateBasedTimer = false; // Flag to identify date-based timers
     let highestUnitUsed = 'seconds'; // Track highest unit used for units=full mode
+    let fontScale = 1;
+
+    
     
     // Get timezone parameter (e.g., 'America/New_York', 'Europe/London')
     const timezone = urlParams.get('timezone');
@@ -182,6 +185,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--title-color', '#' + urlParams.get('titlecolor'));
     }
     
+    if (urlParams.has('fontscale')) {
+        const fs = parseFloat(urlParams.get('fontscale'));
+        if (!isNaN(fs)) {
+            fontScale = Math.min(2, Math.max(0.5, fs));
+        }
+    }
+        document.documentElement.style.setProperty('--font-scale', fontScale);
+    
     // Standard display elements
     const daysElement = document.getElementById('days');
     const hoursElement = document.getElementById('hours');
@@ -247,7 +258,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     labelcolor: urlParams.get('labelcolor') || '',
                     progresscolor: urlParams.get('progresscolor') || '',
                     titlecolor: urlParams.get('titlecolor') || '',
-                    
+                    fontscale: urlParams.get('fontscale') || (fontScale !== 1 ? String(fontScale) : ''),
+
                     // Get endmessage parameter, with fallback to completeemoji for backwards compatibility
                     endmessage: urlParams.get('endmessage') || urlParams.get('completeemoji') || '',
                     
@@ -377,6 +389,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 { saved: 'progresscolor', css: '--progress-color' },
                 { saved: 'titlecolor', css: '--title-color' }
             ];
+            
+            if (savedState.fontscale) {
+                const fs = parseFloat(savedState.fontscale);
+                if (!isNaN(fs)) {
+                    document.documentElement.style.setProperty('--font-scale', Math.min(2, Math.max(0.5, fs)));
+                }
+            }
             
             colorMappings.forEach(mapping => {
                 if (savedState[mapping.saved]) {

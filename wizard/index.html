@@ -19,7 +19,7 @@
                 <div class="tabs">
                     <button class="tab-btn active" data-tab="time">Time</button>
                     <button class="tab-btn" data-tab="display">Display</button>
-                    <button class="tab-btn" data-tab="colors">Colors</button>
+                    <button class="tab-btn" data-tab="style">Style</button>
                     <button class="tab-btn" data-tab="advanced">Advanced</button>
                 </div>
                 
@@ -156,49 +156,61 @@
                         </div>
                     </div>
                     
-                    <!-- COLORS TAB -->
-                    <div class="tab-pane" id="colors-tab">
-                        <h2>Color Customization</h2>
-                        
-                        <div class="color-options">
-                            <div class="color-option">
-                                <label for="bgcolor">Background Color:</label>
-                                <input type="color" id="bgcolor" value="#f5f5f5">
-                            </div>
-                            
-                            <div class="color-option">
-                                <label for="timercolor">Timer Background:</label>
-                                <input type="color" id="timercolor" value="#ffffff">
-                            </div>
-                            
-                            <div class="color-option">
-                                <label for="textcolor">Timer Text:</label>
-                                <input type="color" id="textcolor" value="#333333">
-                            </div>
-                            
-                            <div class="color-option">
-                                <label for="labelcolor">Label Text:</label>
-                                <input type="color" id="labelcolor" value="#666666">
-                            </div>
-                            
-                            <div class="color-option">
-                                <label for="progresscolor">Progress Bar:</label>
-                                <input type="color" id="progresscolor" value="#4caf50">
-                            </div>
-                            
-                            <div class="color-option">
-                                <label for="titlecolor">Title Text:</label>
-                                <input type="color" id="titlecolor" value="#333333">
+                    <!-- STYLE TAB -->
+                    <div class="tab-pane" id="style-tab">
+                        <h2>Style</h2>
+
+                        <div class="option-section">
+                            <h3>Typography</h3>
+                            <div class="option-group">
+                                <label for="fontscale">Font Scale: <span id="fontscale-value">1.00x</span></label>
+                                <input type="range" id="fontscale" min="0.5" max="2.0" step="0.05" value="1">
+                                <div class="option-hint">Scales all timer text. Default is 1.00x (no scaling).</div>
                             </div>
                         </div>
-                        
-                        <div class="option-group checkbox">
-                            <label>
-                                <input type="checkbox" id="use-default-colors" checked>
-                                Use Theme Default Colors
-                            </label>
+
+                        <div class="option-section">
+                            <h3>Colors</h3>
+                            <div class="color-options">
+                                <div class="color-option">
+                                    <label for="bgcolor">Background Color:</label>
+                                    <input type="color" id="bgcolor" value="#f5f5f5">
+                                </div>
+                                
+                                <div class="color-option">
+                                    <label for="timercolor">Timer Background:</label>
+                                    <input type="color" id="timercolor" value="#ffffff">
+                                </div>
+                                
+                                <div class="color-option">
+                                    <label for="textcolor">Timer Text:</label>
+                                    <input type="color" id="textcolor" value="#333333">
+                                </div>
+                                
+                                <div class="color-option">
+                                    <label for="labelcolor">Label Text:</label>
+                                    <input type="color" id="labelcolor" value="#666666">
+                                </div>
+                                
+                                <div class="color-option">
+                                    <label for="progresscolor">Progress Bar:</label>
+                                    <input type="color" id="progresscolor" value="#4caf50">
+                                </div>
+                                
+                                <div class="color-option">
+                                    <label for="titlecolor">Title Text:</label>
+                                    <input type="color" id="titlecolor" value="#333333">
+                                </div>
+                            </div>
+                            
+                            <div class="option-group checkbox">
+                                <label>
+                                    <input type="checkbox" id="use-default-colors" checked>
+                                    Use Theme Default Colors
+                                </label>
+                            </div>
+                            <p><b>Note:</b> Custom color parameters currently work best with <code>theme=light</code> (default theme). When using <code>theme=dark</code>, the dark theme's predefined colors will take precedence over custom color settings.</p>
                         </div>
-                        <p><b>Note:</b> Custom color parameters currently work best with `theme=light` (default theme). When using `theme=dark`, the dark theme's predefined colors will take precedence over custom color settings.</p>
                     </div>
                     
                     <!-- ADVANCED OPTIONS TAB -->
