@@ -197,6 +197,11 @@ function getBaseUrl() {
             if (webhookdelay && webhookdelay !== '0') {
                 urlParams.append('webhookdelay', webhookdelay);
             }
+            // Webhook CORS mode
+            const webhookcors = document.getElementById('webhookcors').value;
+            if (webhookcors !== 'default') {
+                urlParams.append('webhookcors', webhookcors);
+            }
         }
         
         // Generate the final URL

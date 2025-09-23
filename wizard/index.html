@@ -237,6 +237,17 @@
                                 <label for="webhookdelay">Webhook Delay (seconds):</label>
                                 <input type="number" id="webhookdelay" min="0" value="0">
                             </div>
+    
+                            <div class="option-group">
+                                <label for="webhookcors">CORS Mode:</label>
+                                <select id="webhookcors">
+                                    <option value="default">Default (Standard CORS rules)</option>
+                                    <option value="no-cors">No-CORS (Attempt to bypass CORS checking)</option>
+                                </select>
+                                <div class="option-hint">
+                                    <p>Use "No-CORS" mode for Bitfocus Companion if CORS cannot be enabled in Companion settings.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

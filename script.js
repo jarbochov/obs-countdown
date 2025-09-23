@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const webhookUrl = urlParams.get('webhookurl');
     const webhookMethod = urlParams.get('webhookmethod') || 'GET'; // Default to GET
     const webhookDelay = urlParams.has('webhookdelay') ? parseInt(urlParams.get('webhookdelay')) * 1000 : 0; // Default to no delay
-    
+    const webhookCors = urlParams.get('webhookcors') || 'default'; // 'default' or 'no-cors'
     
     
     let targetDate;
@@ -435,34 +435,63 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Webhook Function
-    function callWebhook(url, method) {
-        console.log(`Calling webhook: ${method} ${url}`);
+function callWebhook(url, method) {
+        // Get webhookcors parameter value, default to 'default'
+        const webhookCors = urlParams.get('webhookcors') || 'default';
+        
+        console.log(`Calling webhook: ${method} ${url} with CORS mode: ${webhookCors}`);
+        
+        const corsMode = webhookCors === 'no-cors' ? 'no-cors' : 'cors';
         
         if (method.toUpperCase() === 'GET') {
-            fetch(url, { method: 'GET' })
+            fetch(url, { 
+                method: 'GET',
+                mode: corsMode
+            })
+            .then(response => {
+                // When using no-cors, we can't access response details
+                if (webhookCors === 'no-cors') {
+                    console.log('Webhook request sent with no-cors mode (response details unavailable)');
+                } else {
+                    console.log('Webhook called successfully:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error calling webhook:', error);
+            });
+        } else if (method.toUpperCase() === 'POST') {
+            // For Bitfocus Companion with no-cors, we need to remove headers and body
+            // to make it a simple request that doesn't trigger preflight
+            if (webhookCors === 'no-cors') {
+                fetch(url, { 
+                    method: 'POST',
+                    mode: 'no-cors'
+                })
+                .then(response => {
+                    console.log('Webhook request sent with no-cors mode (response details unavailable)');
+                })
+                .catch(error => {
+                    console.error('Error calling webhook:', error);
+                });
+            } else {
+                // Original POST behavior with JSON body for normal CORS mode
+                fetch(url, { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        event: 'timer_complete',
+                        timestamp: new Date().toISOString()
+                    })
+                })
                 .then(response => {
                     console.log('Webhook called successfully:', response.status);
                 })
                 .catch(error => {
                     console.error('Error calling webhook:', error);
                 });
-        } else if (method.toUpperCase() === 'POST') {
-            fetch(url, { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    event: 'timer_complete',
-                    timestamp: new Date().toISOString()
-                })
-            })
-            .then(response => {
-                console.log('Webhook called successfully:', response.status);
-            })
-            .catch(error => {
-                console.error('Error calling webhook:', error);
-            });
+            }
         }
     }
     

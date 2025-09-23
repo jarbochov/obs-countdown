@@ -196,6 +196,13 @@ input[type="number"] {
     margin-right: 10px;
 }
 
+.option-hint {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
 input[type="color"] {
     width: 50px;
     height: 30px;

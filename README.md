@@ -143,8 +143,22 @@ For best results when using as an OBS Browser Source:
 3. Disable "Refresh browser when scene becomes active" to prevent timer resets
 4. Use custom CSS in OBS to make the background transparent if needed:
 ```css
-body { background-color: rgba(0, 0, 0, 0) !important; }
+body, html { background-color: transparent !important; }
+.container { background-color: transparent !important; }
 ```
+For a semi-transparent timer display:
+
+```css
+body, html { background-color: transparent !important; }
+.container { background-color: transparent !important; }
+#timer, #compact-timer { background-color: rgba(0, 0, 0, 0.5) !important; }
+```
+For better readability on varied backgrounds, add text shadow:
+
+```css
+.label, #timer-title { text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important; }
+```
+
 
 ## Configuration Wizard
 
