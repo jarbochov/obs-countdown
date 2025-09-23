@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Countdown Timer</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Immediate styles to prevent flash */
+        html, body { 
+            background-color: transparent !important; 
+            visibility: visible !important;
+        }
+        
+        /* Hide all content until CSS loads */
+        .container { 
+            opacity: 0; 
+            animation: fadeIn 0.1s ease-in forwards;
+            animation-delay: 0.3s; /* Adjust this delay as needed */
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
