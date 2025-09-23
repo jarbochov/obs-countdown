@@ -179,7 +179,7 @@ input[type="number"] {
     width: 15px;
     height: 15px;
     }
-}
+
 
 /* Range + Readout */
 input[type="range"] {
@@ -194,37 +194,59 @@ input[type="range"] {
 }
 
 /* Color Options */
-.color-options {
-    width: 80%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(100px, 1fr));
-    gap: 15px;
-    column-gap: 20px;
-    margin-bottom: 20px;
-}
-
 .color-option {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(100px, 1fr)); /* label | color | slider-fill | readout */
+    grid-template-areas:
+        "label"
+        "color"
+        "slider"
+        "readout";
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #00000022;
+    border-radius: 15px;
+    background-color: #00000005;
+    padding: 15px;
 }
 
 .color-option label {
-    flex: 1;
-    margin-right: 10px;
+    text-align: center;
+    font-weight: 700;
+    grid-area: label;
+    margin: 0;
 }
 
-.option-hint {
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 5px;
-    font-style: italic;
-}
-
-input[type="color"] {
-    width: 50px;
+.color-option input[type="color"] {
+    grid-area: color;
+    justify-self: start;
+    width: 100%;
     height: 30px;
     border: 1px solid var(--input-border);
     border-radius: 4px;
+}
+
+/* Opacity slider sits below the color */
+.color-option input[type="range"] {
+    grid-area: slider;
+    width: 100%;
+    min-width: 0; /* prevent overflow in narrow containers */
+}
+
+.alpha-readout {
+    grid-area: readout;
+    text-align: center;
+    color: #666;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Optional: widen the overall color section to give sliders room */
+.color-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
+    gap: 20px;
 }
 
 /* URL Preview */

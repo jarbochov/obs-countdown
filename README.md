@@ -135,7 +135,7 @@ When using `POST` method, a JSON payload is sent with the event type and timesta
 11. **Redirect with a 3-second delay**:
 12. **Call a webhook when timer completes**: `?minutes=5&webhookurl=https://example.com/api/timer-done`
 13. **Call a webhook with POST and delay**: `?minutes=1&webhookurl=https://example.com/api/timer-done&webhookmethod=POST&webhookdelay=2`
-
+14. Larger font scale for readability: `?minutes=10&fontscale=1.25`
 
 ## OBS Integration Tips
 

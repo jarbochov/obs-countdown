@@ -5,11 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Remove active class from all buttons and panes
             tabButtons.forEach(btn => btn.classList.remove('active'));
             tabPanes.forEach(pane => pane.classList.remove('active'));
-            
-            // Add active class to clicked button and corresponding pane
             button.classList.add('active');
             const tabId = `${button.dataset.tab}-tab`;
             document.getElementById(tabId).classList.add('active');
@@ -38,17 +35,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const today = new Date();
     const targetDate = document.getElementById('target-date');
     const targetTime = document.getElementById('target-time');
-    
-    targetDate.valueAsDate = today;
-    
-    // Format current time as HH:MM
-    const hours = String(today.getHours()).padStart(2, '0');
-    const minutes = String(today.getMinutes()).padStart(2, '0');
-    targetTime.value = `${hours}:${minutes}`;
+    if (targetDate) targetDate.valueAsDate = today;
+    if (targetTime) {
+        const hh = String(today.getHours()).padStart(2, '0');
+        const mm = String(today.getMinutes()).padStart(2, '0');
+        targetTime.value = `${hh}:${mm}`;
+    }
     
     // Color defaults toggle
     const useDefaultColors = document.getElementById('use-default-colors');
-    const colorInputs = document.querySelectorAll('.color-option input');
+    const colorInputs = document.querySelectorAll('.color-option input'); // includes color + alpha sliders
     
     if (useDefaultColors) {
         useDefaultColors.addEventListener('change', () => {
@@ -57,8 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             updateUrlOutput();
         });
-        
-        // Initial state for color inputs
         colorInputs.forEach(input => {
             input.disabled = useDefaultColors.checked;
         });
@@ -76,14 +70,36 @@ document.addEventListener('DOMContentLoaded', function() {
         fontScaleInput.addEventListener('change', updateFontScaleReadout);
         updateFontScaleReadout();
     }
+
+    // Alpha slider readouts
+    const alphaIds = ['bgcolor','timercolor','textcolor','labelcolor','progresscolor','titlecolor'];
+    alphaIds.forEach(id => {
+        const slider = document.getElementById(`${id}-alpha`);
+        const readout = document.getElementById(`${id}-alpha-readout`);
+        if (slider && readout) {
+            const sync = () => { readout.textContent = `${slider.value}%`; };
+            slider.addEventListener('input', sync);
+            slider.addEventListener('change', sync);
+            sync();
+        }
+    });
+
+    // Helpers to build 8-digit hex when opacity < 100%
+    function percentToAlphaHex(pct) {
+        const clamped = Math.max(0, Math.min(100, parseInt(pct, 10) || 0));
+        const alpha = Math.round((clamped / 100) * 255);
+        return alpha.toString(16).padStart(2, '0');
+    }
+    function buildColorParam(hex6NoHash, alphaPercent) {
+        const base = (hex6NoHash || '').toLowerCase();
+        const a = parseInt(alphaPercent, 10);
+        if (isNaN(a) || a >= 100) return base; // 6-digit when fully opaque
+        return base + percentToAlphaHex(a);     // append AA when < 100%
+    }
     
     // Function to get base URL
     function getBaseUrl() {
-        // If your timer is at the root of your site:
         return window.location.href.replace(/\/wizard\/.*$/, '/index.html');
-        
-        // Or if you need a specific URL:
-        // return "https://your-domain.com/index.html";
     }
     
     // Function to update URL output
@@ -92,143 +108,111 @@ document.addEventListener('DOMContentLoaded', function() {
         const baseUrl = getBaseUrl();
         
         // Time parameters
-        const timerType = document.querySelector('input[name="timer-type"]:checked').value;
+        const timerTypeEl = document.querySelector('input[name="timer-type"]:checked');
+        const timerType = timerTypeEl ? timerTypeEl.value : 'duration';
         
         if (timerType === 'duration') {
-            const days = parseInt(document.getElementById('days').value);
-            const hours = parseInt(document.getElementById('hours').value);
-            const minutes = parseInt(document.getElementById('minutes').value);
-            const seconds = parseInt(document.getElementById('seconds').value);
+            const days = parseInt(document.getElementById('days').value || '0', 10);
+            const hours = parseInt(document.getElementById('hours').value || '0', 10);
+            const minutes = parseInt(document.getElementById('minutes').value || '0', 10);
+            const seconds = parseInt(document.getElementById('seconds').value || '0', 10);
             
             if (days > 0) urlParams.append('days', days);
             if (hours > 0) urlParams.append('hours', hours);
             if (minutes > 0) urlParams.append('minutes', minutes);
             if (seconds > 0) urlParams.append('seconds', seconds);
             
-            // If all values are 0, set default of 5 minutes
             if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
                 urlParams.append('minutes', 5);
             }
         } else {
-            // Date-based timer
             const dateValue = document.getElementById('target-date').value;
             const timeValue = document.getElementById('target-time').value;
-            
             if (dateValue) {
-                // Combine date and time
-                if (timeValue) {
-                    urlParams.append('date', `${dateValue}T${timeValue}:00`);
-                } else {
-                    urlParams.append('date', dateValue);
-                }
+                urlParams.append('date', timeValue ? `${dateValue}T${timeValue}:00` : dateValue);
             }
         }
         
         // Timezone
         const timezone = document.getElementById('timezone').value;
-        if (timezone) {
-            urlParams.append('timezone', timezone);
-        }
+        if (timezone) urlParams.append('timezone', timezone);
         
         // Display options
         const title = document.getElementById('title').value;
-        if (title) {
-            urlParams.append('title', encodeURIComponent(title));
-        }
+        if (title) urlParams.append('title', encodeURIComponent(title));
         
         const theme = document.getElementById('theme').value;
-        if (theme !== 'light') {
-            urlParams.append('theme', theme);
-        }
+        if (theme !== 'light') urlParams.append('theme', theme);
         
         const display = document.getElementById('display').value;
-        if (display !== 'standard') {
-            urlParams.append('display', display);
-        }
+        if (display !== 'standard') urlParams.append('display', display);
         
         const units = document.getElementById('units').value;
-        if (units !== 'auto') {
-            urlParams.append('units', units);
-        }
+        if (units !== 'auto') urlParams.append('units', units);
         
-        if (document.getElementById('progress').checked) {
-            urlParams.append('progress', 'true');
-        }
+        if (document.getElementById('progress').checked) urlParams.append('progress', 'true');
         
         const endmessage = document.getElementById('endmessage').value;
-        if (endmessage && endmessage !== '⌛️') {
-            urlParams.append('endmessage', encodeURIComponent(endmessage));
-        }
+        if (endmessage && endmessage !== '⌛️') urlParams.append('endmessage', encodeURIComponent(endmessage));
         
         const showonend = document.getElementById('showonend').value;
-        if (showonend !== 'message') {
-            urlParams.append('showonend', showonend);
-        }
+        if (showonend !== 'message') urlParams.append('showonend', showonend);
         
-        if (!document.getElementById('mobile').checked) {
-            urlParams.append('mobile', 'false');
-        }
+        if (!document.getElementById('mobile').checked) urlParams.append('mobile', 'false');
 
-        // Style options
-        // Font scale: only include when not the default 1.0
+        // Style options: font scale (only when not default 1.0)
         if (fontScaleInput) {
             const fs = parseFloat(fontScaleInput.value);
             if (!isNaN(fs) && Math.abs(fs - 1) > 0.0001) {
-                const formatted = Math.round(fs * 100) / 100; // up to 2 decimals
+                const formatted = Math.round(fs * 100) / 100;
                 urlParams.append('fontscale', String(formatted));
             }
         }
         
-        // Color customization
+        // Colors with alpha support
+        const defaults = {
+            bgcolor: 'f5f5f5',
+            timercolor: 'ffffff',
+            textcolor: '333333',
+            labelcolor: '666666',
+            progresscolor: '4caf50',
+            titlecolor: '333333'
+        };
         if (!useDefaultColors || (useDefaultColors && !useDefaultColors.checked)) {
-            // Helper function to strip # from color values and only add if different from defaults
-            function addColorParam(paramName, inputId, defaultValue) {
-                const el = document.getElementById(inputId);
-                if (!el) return;
-                const colorValue = el.value.substring(1);
-                if (colorValue.toLowerCase() !== defaultValue.toLowerCase()) {
-                    urlParams.append(paramName, colorValue);
+            function addColorParam(name) {
+                const colorEl = document.getElementById(name);
+                const alphaEl = document.getElementById(`${name}-alpha`);
+                if (!colorEl || !alphaEl) return;
+                const hex6 = colorEl.value.substring(1);
+                const alpha = alphaEl.value;
+                const isDefault = hex6.toLowerCase() === defaults[name];
+
+                // Include if color != default OR opacity < 100
+                if (!isDefault || parseInt(alpha, 10) < 100) {
+                    urlParams.append(name, buildColorParam(hex6, alpha));
                 }
             }
-            
-            addColorParam('bgcolor', 'bgcolor', 'f5f5f5');
-            addColorParam('timercolor', 'timercolor', 'ffffff');
-            addColorParam('textcolor', 'textcolor', '333333');
-            addColorParam('labelcolor', 'labelcolor', '666666');
-            addColorParam('progresscolor', 'progresscolor', '4caf50');
-            addColorParam('titlecolor', 'titlecolor', '333333');
+            ['bgcolor','timercolor','textcolor','labelcolor','progresscolor','titlecolor'].forEach(addColorParam);
         }
         
         // Redirect options
         const redirecturl = document.getElementById('redirecturl').value;
         if (redirecturl) {
             urlParams.append('redirecturl', redirecturl);
-            
             const redirectdelay = document.getElementById('redirectdelay').value;
-            if (redirectdelay && redirectdelay !== '1') {
-                urlParams.append('redirectdelay', redirectdelay);
-            }
+            if (redirectdelay && redirectdelay !== '1') urlParams.append('redirectdelay', redirectdelay);
         }
         
         // Webhook options
         const webhookurl = document.getElementById('webhookurl').value;
         if (webhookurl) {
             urlParams.append('webhookurl', webhookurl);
-            
             const webhookmethod = document.getElementById('webhookmethod').value;
-            if (webhookmethod !== 'GET') {
-                urlParams.append('webhookmethod', webhookmethod);
-            }
-            
+            if (webhookmethod !== 'GET') urlParams.append('webhookmethod', webhookmethod);
             const webhookdelay = document.getElementById('webhookdelay').value;
-            if (webhookdelay && webhookdelay !== '0') {
-                urlParams.append('webhookdelay', webhookdelay);
-            }
-            // Webhook CORS mode
+            if (webhookdelay && webhookdelay !== '0') urlParams.append('webhookdelay', webhookdelay);
             const webhookcors = document.getElementById('webhookcors').value;
-            if (webhookcors !== 'default') {
-                urlParams.append('webhookcors', webhookcors);
-            }
+            if (webhookcors !== 'default') urlParams.append('webhookcors', webhookcors);
         }
         
         // Generate the final URL
@@ -236,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('url-output').textContent = finalUrl;
     }
     
-    // Add event listeners to all form elements
+    // Update URL on any input change
     const formElements = document.querySelectorAll('input, select');
     formElements.forEach(element => {
         element.addEventListener('change', updateUrlOutput);
