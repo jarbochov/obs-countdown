@@ -42,20 +42,26 @@ document.addEventListener('DOMContentLoaded', function() {
         targetTime.value = `${hh}:${mm}`;
     }
     
-    // Color defaults toggle
+    // Color defaults toggle (visibility + disable)
     const useDefaultColors = document.getElementById('use-default-colors');
-    const colorInputs = document.querySelectorAll('.color-option input'); // includes color + alpha sliders
-    
+    const colorInputs = document.querySelectorAll('.color-option input'); // color + any alpha sliders if placed inside .color-option
+    const colorOptionsDiv = document.getElementById('color-options') || document.querySelector('.color-options'); // wrapper to hide/show
+
+    function syncColorOptionsVisibility() {
+        if (!useDefaultColors || !colorOptionsDiv) return;
+        const hide = useDefaultColors.checked; // hide when using theme defaults
+        colorOptionsDiv.hidden = hide;                // semantic
+        colorOptionsDiv.style.display = hide ? 'none' : ''; // inline style overrides grid
+        colorInputs.forEach(input => { input.disabled = hide; });
+    }
+
     if (useDefaultColors) {
         useDefaultColors.addEventListener('change', () => {
-            colorInputs.forEach(input => {
-                input.disabled = useDefaultColors.checked;
-            });
+            syncColorOptionsVisibility();
             updateUrlOutput();
         });
-        colorInputs.forEach(input => {
-            input.disabled = useDefaultColors.checked;
-        });
+        // Initial state
+        syncColorOptionsVisibility();
     }
 
     // Font scale readout
@@ -71,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateFontScaleReadout();
     }
 
-    // Alpha slider readouts
+    // Alpha slider readouts (optional; only activates if sliders exist)
     const alphaIds = ['bgcolor','timercolor','textcolor','labelcolor','progresscolor','titlecolor'];
     alphaIds.forEach(id => {
         const slider = document.getElementById(`${id}-alpha`);
@@ -181,10 +187,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!useDefaultColors || (useDefaultColors && !useDefaultColors.checked)) {
             function addColorParam(name) {
                 const colorEl = document.getElementById(name);
-                const alphaEl = document.getElementById(`${name}-alpha`);
-                if (!colorEl || !alphaEl) return;
+                if (!colorEl) return;
                 const hex6 = colorEl.value.substring(1);
-                const alpha = alphaEl.value;
+                const alphaEl = document.getElementById(`${name}-alpha`);
+                const alpha = alphaEl ? alphaEl.value : '100'; // assume fully opaque if no slider present
                 const isDefault = hex6.toLowerCase() === defaults[name];
 
                 // Include if color != default OR opacity < 100
