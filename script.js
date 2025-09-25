@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
+    const direction = urlParams.get('direction') === 'up' ? 'up' : 'down';
     // Add showonend parameter: 'zero' or 'none' or 'message' (default)
     const showOnEnd = urlParams.get('showonend') || 'message';
     // Add redirect parameters
