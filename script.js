@@ -704,38 +704,35 @@ function callWebhook(url, method) {
     console.log('Redirect URL:', redirectUrl || 'None');
     console.log('Redirect delay (ms):', redirectUrl ? redirectDelay : 'N/A');
     
-    // Add count-up indicator to both display modes
+    // Add count-up indicator to both display modes ONLY when counting up
     function addCountUpIndicators() {
+    // Add .counting-up class for styling
+    standardTimer.classList.add('counting-up');
+    compactTimer.classList.add('counting-up');
+        if (!isCountingUp) return;
         // For standard display
         const standardTimeSegments = document.querySelectorAll('.standard-display .time-segment');
         standardTimeSegments.forEach(segment => {
-            // Check if indicator already exists
             if (!segment.querySelector('.countup-indicator')) {
                 const indicator = document.createElement('span');
                 indicator.className = 'countup-indicator';
                 indicator.textContent = '+';
-                indicator.style.display = isCountingUp ? 'inline' : 'none';
-                
-                // Insert before the timer value
+                indicator.style.display = 'inline';
                 const valueElement = segment.querySelector('span:first-child');
                 if (valueElement) {
                     segment.insertBefore(indicator, valueElement);
                 }
             }
         });
-        
         // For compact display
-        if (!document.querySelector('.compact-display .countup-indicator')) {
+        const compactTimerElement = document.getElementById('compact-timer');
+        if (compactTimerElement && !compactTimerElement.querySelector('.countup-indicator')) {
             const compactIndicator = document.createElement('span');
             compactIndicator.className = 'countup-indicator';
             compactIndicator.textContent = '+';
-            compactIndicator.style.display = isCountingUp ? 'inline' : 'none';
-            
-            // Insert at the beginning of the compact timer
-            const compactTimerElement = document.getElementById('compact-timer');
+            compactIndicator.style.display = 'inline';
             compactTimerElement.insertBefore(compactIndicator, compactTimerElement.firstChild);
         }
-        
         // Show SINCE label for date-based timers
         if (isDateBasedTimer && isCountingUp) {
             if (!sinceElement) {
@@ -744,9 +741,24 @@ function callWebhook(url, method) {
             sinceElement.style.display = 'block';
         }
     }
-    
-    // Call once at initialization to add the indicators to the DOM
-    addCountUpIndicators();
+
+    // Remove all countup indicators from DOM
+    function removeCountUpIndicators() {
+    // Remove .counting-up class for styling
+    standardTimer.classList.remove('counting-up');
+    compactTimer.classList.remove('counting-up');
+        document.querySelectorAll('.countup-indicator').forEach(el => el.remove());
+        if (sinceElement && !isCountingUp) {
+            sinceElement.style.display = 'none';
+        }
+    }
+
+    // Initial: only add indicators if starting in countup mode
+    if (isCountingUp) {
+        addCountUpIndicators();
+    } else {
+        removeCountUpIndicators();
+    }
     
     // Update timer function
     function updateTimer() {
@@ -758,23 +770,9 @@ function callWebhook(url, method) {
             isCountingUp = true;
             transitionOccurred = true;
             console.log('Transitioning to countup mode');
-            
-            // Add countup indicators
-            document.querySelectorAll('.countup-indicator').forEach(indicator => {
-                indicator.style.display = 'inline';
-            });
-            
-            // Show SINCE label for date-based timers
-            if (isDateBasedTimer) {
-                if (!sinceElement) {
-                    sinceElement = createSinceElement();
-                }
-                sinceElement.style.display = 'block';
-            }
-            
+            addCountUpIndicators();
             // Hide progress bar during countup
             progressContainer.style.display = 'none';
-            
             // Call webhook if URL is specified (only on transition)
             if (webhookUrl) {
                 console.log(`Timer transitioned to count up. Calling webhook ${webhookUrl} in ${webhookDelay/1000} seconds...`);
@@ -782,7 +780,6 @@ function callWebhook(url, method) {
                     callWebhook(webhookUrl, webhookMethod);
                 }, webhookDelay);
             }
-            
             // Execute redirect if specified (only on transition)
             if (redirectUrl) {
                 console.log(`Timer transitioned to count up. Redirecting to ${redirectUrl} in ${redirectDelay/1000} seconds...`);
@@ -795,90 +792,21 @@ function callWebhook(url, method) {
         // If we're in countup mode, calculate the elapsed time since target date
         if (isCountingUp) {
             difference = Math.abs(now - targetDate);
-            
             // Handle display when counting up
             standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
             compactTimer.style.display = displayMode === 'compact' ? 'flex' : 'none';
             progressContainer.style.display = 'none'; // No progress bar in countup mode
-            
             // Ensure title is displayed during countup if it exists
             if (timerTitle) {
                 timerTitleElement.style.display = 'block';
             }
-        }
-        // Handle countdown completion with no countup (direction=down explicitly set)
-        else if (difference <= 0) {
-            clearInterval(countdownInterval);
-            
-            // Handle different showOnEnd modes
-            if (showOnEnd === 'zero') {
-                // Show zeroes in both displays
-                daysElement.textContent = '00';
-                hoursElement.textContent = '00';
-                minutesElement.textContent = '00';
-                secondsElement.textContent = '00';
-                compactDaysElement.textContent = '00';
-                compactHoursElement.textContent = '00';
-                compactMinutesElement.textContent = '00';
-                compactSecondsElement.textContent = '00';
-                
-                // Show timer, hide complete message
-                standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
-                compactTimer.style.display = displayMode === 'compact' ? 'flex' : 'none';
-                progressContainer.style.display = 'none';
-                timerTitleElement.style.display = 'none';
-                completeMessage.style.display = 'none';
-            } 
-            else if (showOnEnd === 'none') {
-                // Show absolutely nothing
-                standardTimer.style.display = 'none';
-                compactTimer.style.display = 'none';
-                progressContainer.style.display = 'none';
-                timerTitleElement.style.display = 'none';
-                completeMessage.style.display = 'none';
-                
-                // Add logging to help debug the redirect
-                console.log("Timer complete with showonend=none. Redirect URL:", redirectUrl);
+        } else {
+            // Always remove countup indicators and styling during countdown
+            removeCountUpIndicators();
+            if (difference <= 0) {
+                clearInterval(countdownInterval);
+                // ...existing code...
             }
-            else {
-                // Default: Show endmessage
-                standardTimer.style.display = 'none';
-                compactTimer.style.display = 'none';
-                progressContainer.style.display = 'none';
-                timerTitleElement.style.display = 'none';
-                completeMessage.style.display = 'block';
-                
-                // Get endmessage parameter, with fallback to completeemoji for backwards compatibility
-                if (urlParams.has('endmessage') || urlParams.has('completeemoji')) {
-                    const endMessage = urlParams.get('endmessage') || urlParams.get('completeemoji');
-                    completeMessage.textContent = decodeURIComponent(endMessage);
-                    
-                    // Log deprecation warning if old parameter is used
-                    if (urlParams.has('completeemoji') && !urlParams.has('endmessage')) {
-                        console.log('Note: "completeemoji" parameter is deprecated. Please use "endmessage" instead.');
-                    }
-                }
-            }
-            
-            // Redirect if a URL is specified (and we're not in countup mode)
-            if (redirectUrl) {
-                console.log(`Timer complete. Redirecting to ${redirectUrl} in ${redirectDelay/1000} seconds...`);
-                setTimeout(() => {
-                    window.location.href = redirectUrl;
-                }, redirectDelay);
-            }
-            
-            // Call webhook if URL is specified (and we're not in countup mode)
-            if (webhookUrl) {
-                console.log(`Timer complete. Calling webhook ${webhookUrl} in ${webhookDelay/1000} seconds...`);
-                setTimeout(() => {
-                    callWebhook(webhookUrl, webhookMethod);
-                }, webhookDelay);
-            }
-            
-            // Clear the saved timer state
-            localStorage.removeItem('current_timer');
-            return;
         }
         
         // Calculate time units
