@@ -117,8 +117,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const timerTypeEl = document.querySelector('input[name="timer-type"]:checked');
     const timerType = timerTypeEl ? timerTypeEl.value : 'duration';
     const directionEl = document.querySelector('input[name="timer-direction"]:checked');
-    const direction = directionEl ? directionEl.value : 'countdown';
-    if (direction !== 'countdown') urlParams.append('direction', direction);
+    const direction = directionEl ? directionEl.value : 'down';
+    if (direction === 'up') urlParams.append('direction', 'up');
         
         if (timerType === 'duration') {
             const days = parseInt(document.getElementById('days').value || '0', 10);
