@@ -1,3 +1,11 @@
+/* Context date/time for SINCE label */
+.since-context {
+    font-size: calc(clamp(0.95rem, 2.5vh, 1.2rem) * var(--font-scale));
+    color: var(--label-color);
+    margin-top: 2px;
+    letter-spacing: normal;
+    text-align: center;
+}
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
 
 :root {

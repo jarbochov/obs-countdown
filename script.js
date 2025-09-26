@@ -225,22 +225,37 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create a "SINCE" element for date-based countup timers
     function createSinceElement() {
         // Check if element already exists
-        if (document.getElementById('since-label')) {
-            return document.getElementById('since-label');
-        }
-        
+        let sinceEl = document.getElementById('since-label');
+        if (sinceEl) return sinceEl;
+
         // Create the element
-        const sinceEl = document.createElement('div');
+        sinceEl = document.createElement('div');
         sinceEl.id = 'since-label';
         sinceEl.className = 'since-label';
-        sinceEl.textContent = 'SINCE';
         sinceEl.style.display = 'none';
-        
+
+        // Add SINCE text
+        const sinceText = document.createElement('span');
+        sinceText.textContent = 'SINCE';
+        sinceEl.appendChild(sinceText);
+
+        // Optionally add context date/time in its own div below SINCE
+        const showContext = urlParams.get('showcontext') === 'true';
+        if (showContext && isDateBasedTimer && targetDate) {
+            const contextDiv = document.createElement('div');
+            contextDiv.className = 'since-context';
+            // Format date/time for context
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            contextDiv.textContent = targetDate.toLocaleString(undefined, options);
+        // Styling now handled in styles.css
+            sinceEl.appendChild(contextDiv);
+        }
+
         // Insert after the timer
         const container = document.querySelector('.container');
         const timer = document.getElementById('timer');
         container.insertBefore(sinceEl, timer.nextSibling);
-        
+
         return sinceEl;
     }
     
@@ -572,7 +587,7 @@ function callWebhook(url, method) {
         if (urlParams.has('date')) {
             isDateBasedTimer = true;
             const dateString = urlParams.get('date');
-            
+
             // If only a date is provided (no time), set it to beginning of the day (00:00:00)
             if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
                 // Create date at 00:00:00 of the specified date in the given timezone
@@ -581,26 +596,28 @@ function callWebhook(url, method) {
                 // If date and time are provided, use the specified timezone
                 targetDate = createDate(dateString);
             }
-            
+
             // Check if the date is valid
             if (isNaN(targetDate.getTime())) {
                 console.error('Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS');
                 targetDate = null;
             }
-            
+
             if (targetDate) {
                 // For date-based timers, calculate the difference to determine which units to show
                 const now = getCurrentDate();
-                
+
                 // Check if the target date is in the past - if so, start in countup mode
                 if (targetDate < now && countDirection !== 'down') {
                     isCountingUp = true;
                     sinceElement = createSinceElement();
                     console.log('Date is in the past, starting in countup mode.');
+                    // Show countup indicators immediately
+                    addCountUpIndicators();
                 }
-                
+
                 const difference = Math.abs(targetDate - now);
-                
+
                 // Determine highest unit needed based on the time difference
                 if (difference >= 86400000) { // 1 day in milliseconds
                     highestUnitUsed = 'days';
@@ -611,7 +628,7 @@ function callWebhook(url, method) {
                 } else {
                     highestUnitUsed = 'seconds';
                 }
-                
+
                 console.log('Date-based timer, highest unit needed:', highestUnitUsed);
             }
             
@@ -621,9 +638,9 @@ function callWebhook(url, method) {
             const now = getCurrentDate(); // Get current time in specified timezone
             startDate = new Date(now); // Store the start date for progress calculation
             targetDate = new Date(now);
-            
+
             let addedTime = false;
-            
+
             // Determine highest unit used for units=full mode
             if (urlParams.has('days') && parseInt(urlParams.get('days')) > 0) {
                 highestUnitUsed = 'days';
@@ -632,37 +649,37 @@ function callWebhook(url, method) {
             } else if (urlParams.has('minutes') && parseInt(urlParams.get('minutes')) > 0) {
                 highestUnitUsed = 'minutes';
             }
-            
+
             console.log('Highest unit used:', highestUnitUsed); // Debugging log
-            
+
             if (urlParams.has('days')) {
                 const days = parseInt(urlParams.get('days'));
                 targetDate.setDate(targetDate.getDate() + days);
                 totalDuration += days * 24 * 60 * 60 * 1000;
                 addedTime = true;
             }
-            
+
             if (urlParams.has('hours')) {
                 const hours = parseInt(urlParams.get('hours'));
                 targetDate.setHours(targetDate.getHours() + hours);
                 totalDuration += hours * 60 * 60 * 1000;
                 addedTime = true;
             }
-            
+
             if (urlParams.has('minutes')) {
                 const minutes = parseInt(urlParams.get('minutes'));
                 targetDate.setMinutes(targetDate.getMinutes() + minutes);
                 totalDuration += minutes * 60 * 1000;
                 addedTime = true;
             }
-            
+
             if (urlParams.has('seconds')) {
                 const seconds = parseInt(urlParams.get('seconds'));
                 targetDate.setSeconds(targetDate.getSeconds() + seconds);
                 totalDuration += seconds * 1000;
                 addedTime = true;
             }
-            
+
             // If no valid parameters were provided
             if (!addedTime) {
                 // Default to 5 minutes if no parameters provided
@@ -670,14 +687,13 @@ function callWebhook(url, method) {
                 totalDuration = 5 * 60 * 1000;
                 highestUnitUsed = 'minutes'; // Set default highest unit
             }
-            
-            // If direction is set to 'up', we start counting up immediately
-            if (countDirection === 'up') {
+
+            // For direction=up, only start in countup mode if timer is already expired
+            if (countDirection === 'up' && targetDate <= now) {
                 isCountingUp = true;
-                
-                // For countup from zero, we don't need to set target date differently
-                // The countup logic will be handled in updateTimer function
                 console.log('Starting in count up mode from zero.');
+            } else {
+                isCountingUp = false;
             }
         }
         
@@ -706,10 +722,10 @@ function callWebhook(url, method) {
     
     // Add count-up indicator to both display modes ONLY when counting up
     function addCountUpIndicators() {
-    // Add .counting-up class for styling
+    // Only show indicators if counting up AND (date-based OR direction is up)
+    if (!(isCountingUp && (isDateBasedTimer || countDirection === 'up'))) return;
     standardTimer.classList.add('counting-up');
     compactTimer.classList.add('counting-up');
-        if (!isCountingUp) return;
         // For standard display
         const standardTimeSegments = document.querySelectorAll('.standard-display .time-segment');
         standardTimeSegments.forEach(segment => {
@@ -754,23 +770,19 @@ function callWebhook(url, method) {
     }
 
     // Initial: only add indicators if starting in countup mode
-    if (isCountingUp) {
-        addCountUpIndicators();
-    } else {
-        removeCountUpIndicators();
-    }
+    // Always remove indicators and styling on initial load
+    removeCountUpIndicators();
     
     // Update timer function
     function updateTimer() {
         const now = getCurrentDate(); // Get current time in specified timezone
         let difference = targetDate - now;
-        
+
         // Check if we need to transition to countup mode
         if (!isCountingUp && difference <= 0 && countDirection !== 'down') {
             isCountingUp = true;
             transitionOccurred = true;
             console.log('Transitioning to countup mode');
-            addCountUpIndicators();
             // Hide progress bar during countup
             progressContainer.style.display = 'none';
             // Call webhook if URL is specified (only on transition)
@@ -788,9 +800,14 @@ function callWebhook(url, method) {
                 }, redirectDelay);
             }
         }
-        
-        // If we're in countup mode, calculate the elapsed time since target date
+
+        // Show countup indicators ONLY when transitioning to countup mode
         if (isCountingUp) {
+            if (transitionOccurred) {
+                console.log('Adding countup indicators (transition from countdown to countup)');
+                addCountUpIndicators();
+                transitionOccurred = false;
+            }
             difference = Math.abs(now - targetDate);
             // Handle display when counting up
             standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
@@ -800,8 +817,8 @@ function callWebhook(url, method) {
             if (timerTitle) {
                 timerTitleElement.style.display = 'block';
             }
-        } else {
-            // Always remove countup indicators and styling during countdown
+        } else if (!isCountingUp) {
+            // Only remove countup indicators during countdown (not during countup)
             removeCountUpIndicators();
             if (difference <= 0) {
                 clearInterval(countdownInterval);
