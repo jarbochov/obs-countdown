@@ -775,6 +775,7 @@ function callWebhook(url, method) {
     
     // Update timer function
     function updateTimer() {
+
         const now = getCurrentDate(); // Get current time in specified timezone
         let difference = targetDate - now;
 
@@ -821,8 +822,40 @@ function callWebhook(url, method) {
             // Only remove countup indicators during countdown (not during countup)
             removeCountUpIndicators();
             if (difference <= 0) {
+                // Timer has ended (countdown mode)
                 clearInterval(countdownInterval);
-                // ...existing code...
+
+                // Show the end message or handle showonend parameter
+                let endMsg = urlParams.get('endmessage') || urlParams.get('completeemoji') || '';
+                let showMode = showOnEnd;
+                if (showMode === 'none') {
+                    // Hide timer and message
+                    standardTimer.style.display = 'none';
+                    compactTimer.style.display = 'none';
+                    completeMessage.style.display = 'none';
+                } else if (showMode === 'zero') {
+                    // Show timer at zero
+                    daysElement.textContent = '00';
+                    hoursElement.textContent = '00';
+                    minutesElement.textContent = '00';
+                    secondsElement.textContent = '00';
+                    compactDaysElement.textContent = '00';
+                    compactHoursElement.textContent = '00';
+                    compactMinutesElement.textContent = '00';
+                    compactSecondsElement.textContent = '00';
+                    completeMessage.style.display = 'none';
+                } else {
+                    // Show end message (default)
+                    standardTimer.style.display = 'none';
+                    compactTimer.style.display = 'none';
+                    completeMessage.textContent = endMsg || 'Countdown Complete!';
+                    completeMessage.style.display = 'block';
+                }
+                // Hide progress bar
+                progressContainer.style.display = 'none';
+                // Remove saved timer state
+                localStorage.removeItem('current_timer');
+                return;
             }
         }
         
