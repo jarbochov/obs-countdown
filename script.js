@@ -773,184 +773,184 @@ function callWebhook(url, method) {
     // Always remove indicators and styling on initial load
     removeCountUpIndicators();
     
-    // Update timer function
+    // --- Refactored updateTimer and helpers ---
     function updateTimer() {
-        const now = getCurrentDate(); // Get current time in specified timezone
+        const now = getCurrentDate();
         let difference = targetDate - now;
 
-        // Check if we need to transition to countup mode
         if (!isCountingUp && difference <= 0 && countDirection !== 'down') {
-            isCountingUp = true;
-            transitionOccurred = true;
-            console.log('Transitioning to countup mode');
-            // Hide progress bar during countup
-            progressContainer.style.display = 'none';
-            // Call webhook if URL is specified (only on transition)
-            if (webhookUrl) {
-                console.log(`Timer transitioned to count up. Calling webhook ${webhookUrl} in ${webhookDelay/1000} seconds...`);
-                setTimeout(() => {
-                    callWebhook(webhookUrl, webhookMethod);
-                }, webhookDelay);
-            }
-            // Execute redirect if specified (only on transition)
-            if (redirectUrl) {
-                console.log(`Timer transitioned to count up. Redirecting to ${redirectUrl} in ${redirectDelay/1000} seconds...`);
-                setTimeout(() => {
-                    window.location.href = redirectUrl;
-                }, redirectDelay);
-            }
+            handleTransitionToCountUp();
         }
 
-        // Show countup indicators ONLY when transitioning to countup mode
         if (isCountingUp) {
-            if (transitionOccurred) {
-                console.log('Adding countup indicators (transition from countdown to countup)');
-                addCountUpIndicators();
-                transitionOccurred = false;
-            }
-            difference = Math.abs(now - targetDate);
-            // Handle display when counting up
-            standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
-            compactTimer.style.display = displayMode === 'compact' ? 'flex' : 'none';
-            progressContainer.style.display = 'none'; // No progress bar in countup mode
-            // Ensure title is displayed during countup if it exists
-            if (timerTitle) {
-                timerTitleElement.style.display = 'block';
-            }
-        } else if (!isCountingUp) {
-            // Only remove countup indicators during countdown (not during countup)
+            handleCountUpDisplay(now);
+        } else {
             removeCountUpIndicators();
             if (difference <= 0) {
-                clearInterval(countdownInterval);
-                // ...existing code...
+                handleCountdownEnd();
+                return;
             }
+            updateTimerDisplays(difference);
         }
-        
-        // Calculate time units
+    }
+
+    function handleTransitionToCountUp() {
+        isCountingUp = true;
+        transitionOccurred = true;
+        console.log('Transitioning to countup mode');
+        progressContainer.style.display = 'none';
+        if (webhookUrl) {
+            console.log(`Timer transitioned to count up. Calling webhook ${webhookUrl} in ${webhookDelay/1000} seconds...`);
+            setTimeout(() => { callWebhook(webhookUrl, webhookMethod); }, webhookDelay);
+        }
+        if (redirectUrl) {
+            console.log(`Timer transitioned to count up. Redirecting to ${redirectUrl} in ${redirectDelay/1000} seconds...`);
+            setTimeout(() => { window.location.href = redirectUrl; }, redirectDelay);
+        }
+    }
+
+    function handleCountUpDisplay(now) {
+        if (transitionOccurred) {
+            console.log('Adding countup indicators (transition from countdown to countup)');
+            addCountUpIndicators();
+            transitionOccurred = false;
+        }
+        const difference = Math.abs(now - targetDate);
+        standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
+        compactTimer.style.display = displayMode === 'compact' ? 'flex' : 'none';
+        progressContainer.style.display = 'none';
+        if (timerTitle) {
+            timerTitleElement.style.display = 'block';
+        }
+        updateTimerDisplays(difference);
+    }
+
+    function handleCountdownEnd() {
+        clearInterval(countdownInterval);
+        let endMsg = urlParams.get('endmessage') || urlParams.get('completeemoji') || '';
+        let showMode = showOnEnd;
+        if (showMode === 'none') {
+            standardTimer.style.display = 'none';
+            compactTimer.style.display = 'none';
+            completeMessage.style.display = 'none';
+        } else if (showMode === 'zero') {
+            setTimerDisplaysToZero();
+            completeMessage.style.display = 'none';
+        } else {
+            standardTimer.style.display = 'none';
+            compactTimer.style.display = 'none';
+            completeMessage.textContent = endMsg || '⌛️';
+            completeMessage.style.display = 'block';
+        }
+        progressContainer.style.display = 'none';
+        localStorage.removeItem('current_timer');
+    }
+
+    function setTimerDisplaysToZero() {
+        daysElement.textContent = '00';
+        hoursElement.textContent = '00';
+        minutesElement.textContent = '00';
+        secondsElement.textContent = '00';
+        compactDaysElement.textContent = '00';
+        compactHoursElement.textContent = '00';
+        compactMinutesElement.textContent = '00';
+        compactSecondsElement.textContent = '00';
+    }
+
+    function updateTimerDisplays(difference) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-        
-        // Update standard display
+
         daysElement.textContent = formatNumber(days);
         hoursElement.textContent = formatNumber(hours);
         minutesElement.textContent = formatNumber(minutes);
         secondsElement.textContent = formatNumber(seconds);
-        
-        // Update progress bar if enabled and not in countup mode
+        compactDaysElement.textContent = formatNumber(days);
+        compactHoursElement.textContent = formatNumber(hours);
+        compactMinutesElement.textContent = formatNumber(minutes);
+        compactSecondsElement.textContent = formatNumber(seconds);
+
         if (showProgress && originalDuration > 0 && !isCountingUp) {
             const elapsed = originalDuration - difference;
             const percentComplete = Math.min(100, (elapsed / originalDuration) * 100);
             progressBar.style.width = percentComplete + '%';
-            
-            // Log progress updates occasionally
             if (seconds % 10 === 0) {
                 console.log('Progress updated:', percentComplete.toFixed(2) + '%');
             }
         }
-        
-        // Check if we should only show days (more than 1.5 days and not 'full' units mode)
+
         const totalHours = days * 24 + hours;
-        const isLongDuration = totalHours >= 36; // 1.5 days = 36 hours
+        const isLongDuration = totalHours >= 36;
         const showOnlyDays = isLongDuration && unitsDisplay !== 'full';
-        
-        // Adaptive sizing based on visible units
+
         if (showOnlyDays) {
-            // Days-only mode (very large days display)
             standardTimer.classList.add('days-only');
             standardTimer.classList.remove('short-timer');
             compactTimer.classList.add('days-only');
             compactTimer.classList.remove('short-timer');
         } else if (days === 0) {
-            // Short timer (no days)
             standardTimer.classList.add('short-timer');
             standardTimer.classList.remove('days-only');
             compactTimer.classList.add('short-timer');
             compactTimer.classList.remove('days-only');
         } else {
-            // Regular timer
             standardTimer.classList.remove('days-only');
             standardTimer.classList.remove('short-timer');
             compactTimer.classList.remove('days-only');
             compactTimer.classList.remove('short-timer');
         }
-        
-        // For standard display: show/hide units based on the display mode
+
         if (unitsDisplay === 'full') {
-            // When units=full, show all units from the highest used down to seconds
             daysContainer.style.display = (highestUnitUsed === 'days') ? 'flex' : 'none';
             hoursContainer.style.display = (highestUnitUsed === 'days' || highestUnitUsed === 'hours') ? 'flex' : 'none';
             minutesContainer.style.display = (highestUnitUsed !== 'seconds') ? 'flex' : 'none';
-            secondsContainer.style.display = 'flex'; // Always show seconds
+            secondsContainer.style.display = 'flex';
         } else {
-            // Original adaptive display logic for 'auto' mode
             daysContainer.style.display = days > 0 ? 'flex' : 'none';
-            
             if (showOnlyDays) {
-                // If more than 1.5 days, only show days
                 hoursContainer.style.display = 'none';
                 minutesContainer.style.display = 'none';
                 secondsContainer.style.display = 'none';
             } else {
-                // Use the original logic for showing/hiding units
                 hoursContainer.style.display = (days > 0 || hours > 0) ? 'flex' : 'none';
                 minutesContainer.style.display = (days > 0 || hours > 0 || minutes > 0) ? 'flex' : 'none';
-                secondsContainer.style.display = 'flex'; // Always show seconds in standard mode
+                secondsContainer.style.display = 'flex';
             }
         }
-        
-        // Update compact display
-        compactDaysElement.textContent = formatNumber(days);
-        compactHoursElement.textContent = formatNumber(hours);
-        compactMinutesElement.textContent = formatNumber(minutes);
-        compactSecondsElement.textContent = formatNumber(seconds);
-        
-        // For compact display: show/hide units based on the display mode
+
         if (unitsDisplay === 'full') {
-            // When units=full, show all units from the highest used down to seconds
             compactDaysElement.style.display = (highestUnitUsed === 'days') ? 'inline' : 'none';
             daysDelimiter.style.display = (highestUnitUsed === 'days') ? 'inline' : 'none';
-            
             compactHoursElement.style.display = (highestUnitUsed === 'days' || highestUnitUsed === 'hours') ? 'inline' : 'none';
             hoursDelimiter.style.display = (highestUnitUsed === 'days' || highestUnitUsed === 'hours') ? 'inline' : 'none';
-            
             compactMinutesElement.style.display = (highestUnitUsed !== 'seconds') ? 'inline' : 'none';
             minutesDelimiter.style.display = (highestUnitUsed !== 'seconds') ? 'inline' : 'none';
-            
-            compactSecondsElement.style.display = 'inline'; // Always show seconds
+            compactSecondsElement.style.display = 'inline';
         } else {
-            // Original adaptive display logic for 'auto' mode
             if (showOnlyDays) {
-                // If more than 1.5 days, only show days
                 compactDaysElement.style.display = 'inline';
-                daysDelimiter.style.display = 'none'; // Hide delimiter after days
+                daysDelimiter.style.display = 'none';
                 compactHoursElement.style.display = 'none';
                 hoursDelimiter.style.display = 'none';
                 compactMinutesElement.style.display = 'none';
                 minutesDelimiter.style.display = 'none';
                 compactSecondsElement.style.display = 'none';
             } else {
-                // Use the original logic for showing/hiding units
                 const showDays = days > 0;
                 const showHours = days > 0 || hours > 0;
                 const showMinutes = days > 0 || hours > 0 || minutes > 0;
-                
                 compactDaysElement.style.display = showDays ? 'inline' : 'none';
                 daysDelimiter.style.display = showDays ? 'inline' : 'none';
-                
                 compactHoursElement.style.display = showHours ? 'inline' : 'none';
                 hoursDelimiter.style.display = showHours ? 'inline' : 'none';
-                
                 compactMinutesElement.style.display = showMinutes ? 'inline' : 'none';
                 minutesDelimiter.style.display = showMinutes ? 'inline' : 'none';
-                
-                compactSecondsElement.style.display = 'inline'; // Always show seconds
+                compactSecondsElement.style.display = 'inline';
             }
         }
-        
-        // Save the timer state every 10 seconds for potential resumption
-        // Only for non-date-based timers and when not counting up
+
         if (seconds % 10 === 0 && !isDateBasedTimer && !isCountingUp) {
             saveTimerState();
         }
