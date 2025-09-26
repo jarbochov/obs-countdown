@@ -113,9 +113,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams();
         const baseUrl = getBaseUrl();
         
-        // Time parameters
-        const timerTypeEl = document.querySelector('input[name="timer-type"]:checked');
-        const timerType = timerTypeEl ? timerTypeEl.value : 'duration';
+    // Time parameters
+    const timerTypeEl = document.querySelector('input[name="timer-type"]:checked');
+    const timerType = timerTypeEl ? timerTypeEl.value : 'duration';
+    const directionEl = document.querySelector('input[name="timer-direction"]:checked');
+    const direction = directionEl ? directionEl.value : 'countdown';
+    if (direction !== 'countdown') urlParams.append('direction', direction);
         
         if (timerType === 'duration') {
             const days = parseInt(document.getElementById('days').value || '0', 10);
@@ -144,6 +147,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (timezone) urlParams.append('timezone', timezone);
         
         // Display options
+        if (document.getElementById('showcontext') && document.getElementById('showcontext').checked) {
+            urlParams.append('showcontext', 'true');
+        }
         const title = document.getElementById('title').value;
         if (title) urlParams.append('title', encodeURIComponent(title));
         

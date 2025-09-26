@@ -43,6 +43,8 @@ Multiple time units can be combined: `?days=1&hours=12`
 | `mobile` | Control mobile optimization | `true` (default), `false` |
 | `redirecturl` | URL to redirect to when timer completes | `?redirecturl=https://example.com` |
 | `redirectdelay` | Seconds to wait before redirecting (default: 1) | `?redirectdelay=5` |
+| `direction` | Set timer direction | `countdown` (default), `countup` |
+| `showcontext` | Show original date/time context below SINCE (date-based countup only) | `true`, `false` (default) |
 
 #### Units
 
@@ -52,6 +54,13 @@ When using `units=full`, the timer will show all time units from the highest con
 - If you set `days=1`, it will show days, hours, minutes, and seconds (01:00:00:00)
 
 The `auto` setting (default) intelligently hides units that are zero to keep the display clean. For times larger than 1.5 days (36 hours) it will only show the days unit. 
+
+#### Direction
+The direction parameter controls whether the timer counts down or up. When set to countup, the timer will begin counting up only after the countdown reaches zero (for relative timers). If the initial duration is set to zero (e.g., ?minutes=0), countup starts immediately. For date-based timers, countup begins after the target date/time is reached. This allows you to show elapsed time since an event or deadline.
+
+&showcontext:
+When `showcontext=true` is set (with a date-based timer and direction=countup), the timer will display the original target date and time below the SINCE label during countup mode. This provides clear context for viewers about when the event or deadline occurred. The context is only shown after the timer transitions to countup, not during the countdown phase.
+
 
 ### Style Customization
 
@@ -136,6 +145,10 @@ When using `POST` method, a JSON payload is sent with the event type and timesta
 12. **Call a webhook when timer completes**: `?minutes=5&webhookurl=https://example.com/api/timer-done`
 13. **Call a webhook with POST and delay**: `?minutes=1&webhookurl=https://example.com/api/timer-done&webhookmethod=POST&webhookdelay=2`
 14. Larger font scale for readability: `?minutes=10&fontscale=1.25`
+15. **Countup timer (relative):** `?minutes=10&direction=countup` (shows countup indicators after timer reaches zero)
+16. **Countup timer (date-based) with context:** `?date=2023-12-31T23:59:59&direction=countup&showcontext=true` (shows SINCE and original date/time after date is reached)
+
+
 
 ## OBS Integration Tips
 

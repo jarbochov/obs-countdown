@@ -39,6 +39,14 @@
                                     <input type="radio" name="timer-type" value="date">
                                     Target Date (count down to a specific date/time)
                                 </label>
+                                   <label>
+                                       <input type="radio" name="timer-direction" value="countdown" checked>
+                                       Countdown
+                                   </label>
+                                   <label>
+                                       <input type="radio" name="timer-direction" value="countup">
+                                       Countup
+                                   </label>
                             </div>
                         </div>
                         
@@ -97,6 +105,12 @@
                     <!-- DISPLAY OPTIONS TAB -->
                     <div class="tab-pane" id="display-tab">
                         <h2>Display Options</h2>
+                            <div class="option-group checkbox">
+                                <label>
+                                    <input type="checkbox" id="showcontext">
+                                    Show original date/time context below SINCE (date-based countup only)
+                                </label>
+                            </div>
                         
                         <div class="option-group">
                             <label for="title">Title (optional):</label>
