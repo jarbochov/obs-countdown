@@ -848,7 +848,7 @@ function callWebhook(url, method) {
                     // Show end message (default)
                     standardTimer.style.display = 'none';
                     compactTimer.style.display = 'none';
-                    completeMessage.textContent = endMsg || 'Countdown Complete!';
+                    completeMessage.textContent = endMsg || '⌛️';
                     completeMessage.style.display = 'block';
                 }
                 // Hide progress bar
