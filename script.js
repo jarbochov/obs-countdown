@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const direction = urlParams.get('direction') === 'up' ? 'up' : 'down';
     // Add showonend parameter: 'zero' or 'none' or 'message' (default)
     const showOnEnd = urlParams.get('showonend') || 'message';
     // Add redirect parameters
@@ -25,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const webhookMethod = urlParams.get('webhookmethod') || 'GET'; // Default to GET
     const webhookDelay = urlParams.has('webhookdelay') ? parseInt(urlParams.get('webhookdelay')) * 1000 : 0; // Default to no delay
     const webhookCors = urlParams.get('webhookcors') || 'default'; // 'default' or 'no-cors'
+    // Count direction parameter
+    const countDirection = urlParams.get('direction') || 'down'; // Default to countdown
 
     
     let targetDate;
@@ -35,6 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let isDateBasedTimer = false; // Flag to identify date-based timers
     let highestUnitUsed = 'seconds'; // Track highest unit used for units=full mode
     let fontScale = 1;
+    let isCountingUp = false; // New flag to track if we're counting up
+    let transitionOccurred = false; // Track if we've transitioned from countdown to countup
+    let sinceElement; // Element to hold "SINCE" text for date-based countup
 
     
     
@@ -218,6 +222,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const completeMessage = document.getElementById('complete-message');
     const resumeBanner = document.getElementById('resume-banner');
     
+    // Create a "SINCE" element for date-based countup timers
+    function createSinceElement() {
+        // Check if element already exists
+        if (document.getElementById('since-label')) {
+            return document.getElementById('since-label');
+        }
+        
+        // Create the element
+        const sinceEl = document.createElement('div');
+        sinceEl.id = 'since-label';
+        sinceEl.className = 'since-label';
+        sinceEl.textContent = 'SINCE';
+        sinceEl.style.display = 'none';
+        
+        // Insert after the timer
+        const container = document.querySelector('.container');
+        const timer = document.getElementById('timer');
+        container.insertBefore(sinceEl, timer.nextSibling);
+        
+        return sinceEl;
+    }
+    
     // Save current timer state for potential resumption
     function saveTimerState() {
         try {
@@ -272,7 +298,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     redirectdelay: urlParams.get('redirectdelay') || '',
     
                     // Save highest unit used for proper display restoration
-                    highestUnitUsed: highestUnitUsed
+                    highestUnitUsed: highestUnitUsed,
+                    
+                    // Save direction parameter
+                    direction: countDirection
                 };
                 
                 localStorage.setItem('current_timer', JSON.stringify(timerState));
@@ -562,7 +591,15 @@ function callWebhook(url, method) {
             if (targetDate) {
                 // For date-based timers, calculate the difference to determine which units to show
                 const now = getCurrentDate();
-                const difference = targetDate - now;
+                
+                // Check if the target date is in the past - if so, start in countup mode
+                if (targetDate < now && countDirection !== 'down') {
+                    isCountingUp = true;
+                    sinceElement = createSinceElement();
+                    console.log('Date is in the past, starting in countup mode.');
+                }
+                
+                const difference = Math.abs(targetDate - now);
                 
                 // Determine highest unit needed based on the time difference
                 if (difference >= 86400000) { // 1 day in milliseconds
@@ -633,6 +670,15 @@ function callWebhook(url, method) {
                 totalDuration = 5 * 60 * 1000;
                 highestUnitUsed = 'minutes'; // Set default highest unit
             }
+            
+            // If direction is set to 'up', we start counting up immediately
+            if (countDirection === 'up') {
+                isCountingUp = true;
+                
+                // For countup from zero, we don't need to set target date differently
+                // The countup logic will be handled in updateTimer function
+                console.log('Starting in count up mode from zero.');
+            }
         }
         
         if (targetDate && !startDate) {
@@ -651,18 +697,117 @@ function callWebhook(url, method) {
     console.log('Target date:', targetDate);
     console.log('Total duration (ms):', totalDuration);
     console.log('Is date-based timer:', isDateBasedTimer);
+    console.log('Count direction:', countDirection);
+    console.log('Is counting up:', isCountingUp);
     console.log('Mobile optimized:', mobileOptimized && isMobileDevice());
     console.log('Show on end mode:', showOnEnd);
     console.log('Redirect URL:', redirectUrl || 'None');
     console.log('Redirect delay (ms):', redirectUrl ? redirectDelay : 'N/A');
     
+    // Add count-up indicator to both display modes
+    function addCountUpIndicators() {
+        // For standard display
+        const standardTimeSegments = document.querySelectorAll('.standard-display .time-segment');
+        standardTimeSegments.forEach(segment => {
+            // Check if indicator already exists
+            if (!segment.querySelector('.countup-indicator')) {
+                const indicator = document.createElement('span');
+                indicator.className = 'countup-indicator';
+                indicator.textContent = '+';
+                indicator.style.display = isCountingUp ? 'inline' : 'none';
+                
+                // Insert before the timer value
+                const valueElement = segment.querySelector('span:first-child');
+                if (valueElement) {
+                    segment.insertBefore(indicator, valueElement);
+                }
+            }
+        });
+        
+        // For compact display
+        if (!document.querySelector('.compact-display .countup-indicator')) {
+            const compactIndicator = document.createElement('span');
+            compactIndicator.className = 'countup-indicator';
+            compactIndicator.textContent = '+';
+            compactIndicator.style.display = isCountingUp ? 'inline' : 'none';
+            
+            // Insert at the beginning of the compact timer
+            const compactTimerElement = document.getElementById('compact-timer');
+            compactTimerElement.insertBefore(compactIndicator, compactTimerElement.firstChild);
+        }
+        
+        // Show SINCE label for date-based timers
+        if (isDateBasedTimer && isCountingUp) {
+            if (!sinceElement) {
+                sinceElement = createSinceElement();
+            }
+            sinceElement.style.display = 'block';
+        }
+    }
+    
+    // Call once at initialization to add the indicators to the DOM
+    addCountUpIndicators();
+    
     // Update timer function
     function updateTimer() {
         const now = getCurrentDate(); // Get current time in specified timezone
-        const difference = targetDate - now;
+        let difference = targetDate - now;
         
-        // Check if countdown is complete
-        if (difference <= 0) {
+        // Check if we need to transition to countup mode
+        if (!isCountingUp && difference <= 0 && countDirection !== 'down') {
+            isCountingUp = true;
+            transitionOccurred = true;
+            console.log('Transitioning to countup mode');
+            
+            // Add countup indicators
+            document.querySelectorAll('.countup-indicator').forEach(indicator => {
+                indicator.style.display = 'inline';
+            });
+            
+            // Show SINCE label for date-based timers
+            if (isDateBasedTimer) {
+                if (!sinceElement) {
+                    sinceElement = createSinceElement();
+                }
+                sinceElement.style.display = 'block';
+            }
+            
+            // Hide progress bar during countup
+            progressContainer.style.display = 'none';
+            
+            // Call webhook if URL is specified (only on transition)
+            if (webhookUrl) {
+                console.log(`Timer transitioned to count up. Calling webhook ${webhookUrl} in ${webhookDelay/1000} seconds...`);
+                setTimeout(() => {
+                    callWebhook(webhookUrl, webhookMethod);
+                }, webhookDelay);
+            }
+            
+            // Execute redirect if specified (only on transition)
+            if (redirectUrl) {
+                console.log(`Timer transitioned to count up. Redirecting to ${redirectUrl} in ${redirectDelay/1000} seconds...`);
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, redirectDelay);
+            }
+        }
+        
+        // If we're in countup mode, calculate the elapsed time since target date
+        if (isCountingUp) {
+            difference = Math.abs(now - targetDate);
+            
+            // Handle display when counting up
+            standardTimer.style.display = displayMode === 'compact' ? 'none' : 'flex';
+            compactTimer.style.display = displayMode === 'compact' ? 'flex' : 'none';
+            progressContainer.style.display = 'none'; // No progress bar in countup mode
+            
+            // Ensure title is displayed during countup if it exists
+            if (timerTitle) {
+                timerTitleElement.style.display = 'block';
+            }
+        }
+        // Handle countdown completion with no countup (direction=down explicitly set)
+        else if (difference <= 0) {
             clearInterval(countdownInterval);
             
             // Handle different showOnEnd modes
@@ -715,7 +860,7 @@ function callWebhook(url, method) {
                 }
             }
             
-            // Redirect if a URL is specified
+            // Redirect if a URL is specified (and we're not in countup mode)
             if (redirectUrl) {
                 console.log(`Timer complete. Redirecting to ${redirectUrl} in ${redirectDelay/1000} seconds...`);
                 setTimeout(() => {
@@ -723,7 +868,7 @@ function callWebhook(url, method) {
                 }, redirectDelay);
             }
             
-            // Call webhook if URL is specified
+            // Call webhook if URL is specified (and we're not in countup mode)
             if (webhookUrl) {
                 console.log(`Timer complete. Calling webhook ${webhookUrl} in ${webhookDelay/1000} seconds...`);
                 setTimeout(() => {
@@ -748,8 +893,8 @@ function callWebhook(url, method) {
         minutesElement.textContent = formatNumber(minutes);
         secondsElement.textContent = formatNumber(seconds);
         
-        // Update progress bar if enabled
-        if (showProgress && originalDuration > 0) {
+        // Update progress bar if enabled and not in countup mode
+        if (showProgress && originalDuration > 0 && !isCountingUp) {
             const elapsed = originalDuration - difference;
             const percentComplete = Math.min(100, (elapsed / originalDuration) * 100);
             progressBar.style.width = percentComplete + '%';
@@ -860,8 +1005,8 @@ function callWebhook(url, method) {
         }
         
         // Save the timer state every 10 seconds for potential resumption
-        // Only for non-date-based timers
-        if (seconds % 10 === 0 && !isDateBasedTimer) {
+        // Only for non-date-based timers and when not counting up
+        if (seconds % 10 === 0 && !isDateBasedTimer && !isCountingUp) {
             saveTimerState();
         }
     }
@@ -879,7 +1024,7 @@ function callWebhook(url, method) {
         countdownInterval = setInterval(updateTimer, 1000);
         
         // Save initial state for non-date-based timers
-        if (!isDateBasedTimer) {
+        if (!isDateBasedTimer && !isCountingUp) {
             saveTimerState();
         }
     }

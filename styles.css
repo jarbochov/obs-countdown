@@ -330,3 +330,55 @@ body, html {
         margin: 8px 0;
     }
 }
+
+/* Count-up indicator styles */
+.countup-indicator {
+    font-size: calc(clamp(1.5rem, 8vh, 5rem) * var(--font-scale));
+    color: var(--text-color);
+    font-weight: bold;
+    line-height: 1;
+    margin-right: calc(clamp(2px, 0.5vw, 5px) * var(--font-scale));
+    display: inline;
+}
+
+/* For the compact display countup indicator */
+.compact-display .countup-indicator {
+    font-size: calc(clamp(2.5rem, 12vh, 7rem) * var(--font-scale));
+    margin-right: calc(clamp(5px, 1vw, 10px) * var(--font-scale));
+}
+
+/* SINCE label for date-based countup */
+.since-label {
+    font-size: calc(clamp(1rem, 4vh, 2.5rem) * var(--font-scale));
+    color: var(--progress-color);
+    font-weight: bold;
+    margin-top: calc(clamp(10px, 3vh, 30px) * var(--font-scale));
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+/* Mobile optimizations for countup */
+.mobile-optimized .countup-indicator {
+    font-size: calc(clamp(1.2rem, 6vh, 3rem) * var(--font-scale));
+}
+
+.mobile-optimized .compact-display .countup-indicator {
+    font-size: calc(clamp(1.8rem, 7vh, 3.5rem) * var(--font-scale));
+}
+
+.mobile-optimized .since-label {
+    font-size: calc(clamp(0.9rem, 3vh, 1.8rem) * var(--font-scale));
+}
+
+/* Counting up state styling */
+.counting-up .time-segment .label {
+    color: var(--progress-color);
+}
+
+.counting-up.compact-display .delimiter {
+    color: var(--progress-color);
+}
+
+.counting-up .countup-indicator {
+    color: var(--progress-color);
+}
