@@ -29,7 +29,7 @@
                         <h2>Time Configuration</h2>
                         
                         <div class="option-group">
-                            <label class="option-label">Timer Type:</label>
+                            <h3>Timer Type</h3>
                             <div class="radio-group">
                                 <label>
                                     <input type="radio" name="timer-type" value="duration" checked>
@@ -40,9 +40,21 @@
                                     Target Date (count down to a specific date/time)
                                 </label>
                             </div>
+                            <h3>Direction</h3>
+                            <div class="radio radio-group">
+                                <label>
+                                    <input type="radio" name="timer-direction" value="down" checked>
+                                    Countdown
+                                </label>
+                                <label>
+                                    <input type="radio" name="timer-direction" value="up">
+                                    Countup (Starts counting up after countdown ends)
+                                </label>
+                            </div>
                         </div>
                         
                         <!-- Duration settings (shown by default) -->
+                        <h3>Time</h3>
                         <div id="duration-settings">
                             <div class="option-group time-inputs">
                                 <div class="time-input">
@@ -97,6 +109,12 @@
                     <!-- DISPLAY OPTIONS TAB -->
                     <div class="tab-pane" id="display-tab">
                         <h2>Display Options</h2>
+                            <div class="option-group checkbox">
+                                <label>
+                                    <input type="checkbox" id="showcontext">
+                                    Show original date/time context below SINCE (date-based countup only)
+                                </label>
+                            </div>
                         
                         <div class="option-group">
                             <label for="title">Title (optional):</label>
