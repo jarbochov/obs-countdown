@@ -362,7 +362,6 @@ body, html {
     font-weight: bold;
     margin-top: calc(clamp(10px, 3vh, 30px) * var(--font-scale));
     text-align: center;
-    letter-spacing: 2px;
 }
 
 /* Mobile optimizations for countup */
