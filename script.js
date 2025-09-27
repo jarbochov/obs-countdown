@@ -844,6 +844,11 @@ function callWebhook(url, method) {
         }
         progressContainer.style.display = 'none';
         localStorage.removeItem('current_timer');
+        // Redirect on timer completion if redirectUrl is set
+        if (redirectUrl) {
+            console.log(`Timer completed. Redirecting to ${redirectUrl} in ${redirectDelay/1000} seconds...`);
+            setTimeout(() => { window.location.href = redirectUrl; }, redirectDelay);
+        }
     }
 
     function setTimerDisplaysToZero() {
